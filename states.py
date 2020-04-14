@@ -15,7 +15,7 @@ class StatesDB:
         self.port = port
         self.namespace = f'{namespace}.'
         
-        self.redis = redis.Redis(host='localhost', port=6379, db=0)
+        self.redis = redis.Redis(host='localhost', port=port, db=0)
         self.pub_sub = self.redis.pubsub()
         
     def set_state(self, id:str=None, state:dict={}) -> None:

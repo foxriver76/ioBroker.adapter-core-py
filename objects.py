@@ -16,7 +16,7 @@ class ObjectsDB:
         self.objectNamespace = f'{namespace}.o.'
         self.fileNamespace = f'{namespace}.f.'
         
-        self.redis = redis.Redis(host='localhost', port=6379, db=0)
+        self.redis = redis.Redis(host='localhost', port=port, db=0)
         self.pub_sub = self.redis.pubsub()
         
     def set_object(self, id:str=None, obj:dict={}) -> None:
