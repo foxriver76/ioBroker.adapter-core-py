@@ -54,21 +54,37 @@ class Adapter:
         """set state in DB"""
         self._state.set_state(id, state)
     
-    def subscribe_states(self, pattern:str):
+    def subscribe_states(self, pattern:str) -> None:
         """subscribe to state changes"""
         self.subscribe_foreign_states(f'{self.namespace}{pattern}')
         
-    def subscribe_foreign_states(self, pattern:str):
+    def subscribe_foreign_states(self, pattern:str) -> None:
         """subscribe to foreign state changes"""
         self._states.subscribe(pattern)
 
-    def subscribe_objects(self, pattern:str):
+    def subscribe_objects(self, pattern:str) -> None:
         """subscribe to object changes"""
         self.subscribe_foreign_objects(f'{self.namespace}{pattern}')
         
-    def subscribe_foreign_objects(self, pattern:str):
+    def subscribe_foreign_objects(self, pattern:str) -> None:
         """subscribe to foreign state changes"""
         self._objects.subscribe(pattern)
+        
+    def unsubscribe_states(self, pattern:str) -> None:
+        """unsubscribe to state changes"""
+        self.unsubscribe_foreign_states(f'{self.namespace}{pattern}')
+        
+    def unsubscribe_foreign_states(self, pattern:str) -> None:
+        """unsubscribe to foreign state changes"""
+        self._states.unsubscribe(pattern)
+
+    def unsubscribe_objects(self, pattern:str) -> None:
+        """unsubscribe to object changes"""
+        self.unsubscribe_foreign_objects(f'{self.namespace}{pattern}')
+        
+    def unsubscribe_foreign_objects(self, pattern:str) -> None:
+        """unsubscribe to foreign state changes"""
+        self._objects.unsubscribe(pattern)
         
     def get_state_updates(self) -> str:
         """get subscribed state changes"""

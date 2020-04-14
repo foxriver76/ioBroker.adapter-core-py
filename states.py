@@ -34,6 +34,10 @@ class StatesDB:
         """subscribe to state changes"""
         self.pub_sub.psubscribe(f'{self.namespace}{pattern}')
         
+    def unsubscribe(self, pattern:str) -> None:
+        """unsubscribe from object chamges"""
+        self.pub_sub.punsubscribe(f'{self.namespace}{pattern}')
+        
     def get_message(self) -> dict:
         """get subscribed messages if some there"""
         msg:dict = self.pub_sub.get_message(ignore_subscribe_messages=True)
