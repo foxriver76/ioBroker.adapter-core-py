@@ -18,6 +18,22 @@ class Adapter:
         self._objects = ObjectsDB()
         self._states = StatesDB()
         
+        # adapter is alive
+        self._states.set_state(f'system.adapter.{self.namespace}.alive', {
+                'val': True, 
+                'ack': True,
+                'expire': 30,
+                'from': f'system.adapter.{self.namespace}'
+                })
+
+        # tell that we are connected to objects db
+        self._states.set_state(f'system.adapter.{self.namespace}.connected', {
+                'val': True,
+                'ack': True,
+                'expire': 30,
+                'from': f'system.adapter.{self.namespace}'
+                })
+        
     def get_object(self, id:str) -> dict:
         """returns object of adapters namespace"""
         id = f'{self.namespace}.{id}'

@@ -20,10 +20,16 @@ class StatesDB:
         
     def set_state(self, id:str=None, state:dict={}) -> None:
         """Set state in db and publish"""
-        # set object as string
-        self.redis.set(f'{self.namespace}{id}', json.dumps(state))
-        # publish object
+        # check if we set with expire         
+        if 'expire' not in state.keys():
+            # set state as string
+            self.redis.set(f'{self.namespace}{id}', json.dumps(state))
+        else:
+            self.redis.setex(f'{self.namespace}{id}', state['expire'], 
+                             value=json.dumps(state))
+        # publish state
         self.redis.publish(f'{self.namespace}{id}', json.dumps(state))
+
         
     def get_state(self, id:str=None) -> dict:
         """get object out of redis db and parse"""

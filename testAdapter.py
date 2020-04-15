@@ -10,7 +10,7 @@ from adapter import Adapter
 import json
 import time
 
-adapter = Adapter('hm-rpc', 'hm-rpc.1')
+adapter = Adapter('hm-rpc', 'hm-rpc.0')
 
 adapter.set_object('testObj', json.loads('{\
         "type": "state",\
