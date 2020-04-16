@@ -22,13 +22,37 @@ class StatesDB:
         
     async def set_state(self, id:str=None, state:dict={}) -> None:
         """Set state in db and publish"""
-        state['ts'] = int(time.time())
+        if 'ts' not in state.keys():
+            state['ts'] = int(time.time())
+            
+        if 'ack' not in state.keys():
+            state['ack'] = False
+        
+        if 'lc' not in state.keys():
+            # get old obj and check if changed
+            old_state:dict = await self.get_state(id)
+            curr_state = state.copy()
+            
+            # ignore ts and lc
+            curr_state.pop('ts', None)
+            curr_state.pop('lc', None)
+            old_state.pop('ts', None)
+            old_lc:int = old_state.pop('lc', None)
+            
+            if old_state != curr_state and old_lc is not None:
+                # not changed and lc exists
+                state['lc'] = old_lc
+            else:
+                state['lc'] = state['ts']
+
         # check if we set with expire         
         if 'expire' not in state.keys():
             # set state as string
             await self.redis.set(f'{self.namespace}{id}', json.dumps(state))
         else:
-            await self.redis.setex(f'{self.namespace}{id}', state['expire'], 
+            expire:int = state['expire']
+            del state['expire']
+            await self.redis.setex(f'{self.namespace}{id}', expire,
                              value=json.dumps(state))
         # publish state
         await self.redis.publish(f'{self.namespace}{id}', json.dumps(state))
@@ -36,7 +60,11 @@ class StatesDB:
         
     async def get_state(self, id:str=None) -> dict:
         """get object out of redis db and parse"""
-        state:dict = json.loads(await self.redis.get(f'{self.namespace}{id}'))
+        try: 
+            state:dict = json.loads(await self.redis.get(f'{self.namespace}{id}'))
+        except TypeError:
+            # state is not a valid json, probably non existing
+            state:dict = {}
         return state
     
     async def subscribe(self, pattern:str) -> None:

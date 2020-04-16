@@ -23,7 +23,12 @@ class ObjectsDB:
         
     async def set_object(self, id:str=None, obj:dict={}) -> None:
         """Set object in db and publish"""
-        obj['ts'] = int(time.time())
+        if 'ts' not in obj.keys():
+            obj['ts'] = int(time.time())
+            
+        # on objects we save id as attribute
+        obj['_id'] = id
+        
         # set object as string
         await self.redis.set(f'{self.objectNamespace}{id}', json.dumps(obj))
         # publish object
@@ -31,7 +36,11 @@ class ObjectsDB:
         
     async def get_object(self, id:str=None) -> dict:
         """get object out of redis db and parse"""
-        obj:dict = json.loads(await self.redis.get(f'{self.objectNamespace}{id}'))
+        try:
+            obj:dict = json.loads(await self.redis.get(f'{self.objectNamespace}{id}'))
+        except TypeError:
+            # obj is not a valid json, probably non existing
+            obj:dict = {}
         return obj
     
     async def subscribe(self, pattern:str) -> None:
