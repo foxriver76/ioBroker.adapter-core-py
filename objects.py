@@ -9,6 +9,7 @@ Created on Tue Apr 14 11:08:04 2020
 import aioredis
 import json
 import time
+import object_utils as utils
 
 class ObjectsDB:
     
@@ -21,8 +22,11 @@ class ObjectsDB:
         self.redis = await aioredis.create_redis(('localhost', self.port))
         self.subs_receiver = aioredis.pubsub.Receiver()
         
-    async def set_object(self, id:str=None, obj:dict={}) -> None:
+    async def set_object(self, id:str=None, obj:dict={}, options:dict={}) -> None:
         """Set object in db and publish"""
+        # check if access to object should be granted
+        utils.check_object(obj, options, utils.ACCESS_WRITE)
+        
         if 'ts' not in obj.keys():
             obj['ts'] = int(time.time())
             
@@ -34,13 +38,16 @@ class ObjectsDB:
         # publish object
         await self.redis.publish(f'{self.objectNamespace}{id}', json.dumps(obj))
         
-    async def get_object(self, id:str=None) -> dict:
+    async def get_object(self, id:str=None, options:dict={}) -> dict:
         """get object out of redis db and parse"""
         try:
             obj:dict = json.loads(await self.redis.get(f'{self.objectNamespace}{id}'))
         except TypeError:
             # obj is not a valid json, probably non existing
             obj:dict = {}
+        # check if access to object should be granted
+        utils.check_object(obj, options, utils.ACCESS_READ)
+        
         return obj
     
     async def subscribe(self, pattern:str) -> None:
