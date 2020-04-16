@@ -21,12 +21,16 @@ async def main():
             }'
             ))
     
-    testObj = await adapter.get_foreign_object('hm-rpc.0.testObj')
+    try:
+        testObj = await adapter.get_foreign_object('hm-rpc.0.testObj.')
+        print(testObj)
+    except Exception as e:
+        print(e)
+        
     await adapter.set_state('testing', {'val1': True})
     testState = await adapter.get_state('testing')
     
     print(testState)
-    print(testObj)
     
     await adapter.subscribe_objects('*')
     await adapter.subscribe_states('*')

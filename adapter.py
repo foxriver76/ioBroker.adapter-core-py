@@ -45,6 +45,9 @@ class Adapter:
     
     async def get_foreign_object(self, id:str) -> dict:
         """returns object"""
+        #  validate that id does not violate our db pattern
+        self._validate_id(id)
+        
         return await self._objects.get_object(id)
     
     async def set_object(self, id:str, obj:dict) -> None:
@@ -54,8 +57,13 @@ class Adapter:
     
     async def set_foreign_object(self, id:str, obj:dict) -> None:
         """set object in DB"""
+        #  validate that id does not violate our db pattern
+        self._validate_id(id)
+        
+        # add from attribute if not given
         if 'from' not in obj.keys():
             obj['from'] = f'system.adapter.{self.namespace}'
+            
         await self._objects.set_object(id, obj)
         
     async def get_state(self, id:str) -> dict:
@@ -65,6 +73,9 @@ class Adapter:
     
     async def get_foreign_state(self, id:str) -> dict:
         """returns state"""
+        #  validate that id does not violate our db pattern
+        self._validate_id(id)
+        
         return await self._states.get_state(id)
     
     async def set_state(self, id:str, state:dict) -> None:
@@ -74,8 +85,13 @@ class Adapter:
     
     async def set_foreign_state(self, id:str, state:dict) -> None:
         """set state in DB"""
+        #  validate that id does not violate our db pattern
+        self._validate_id(id)
+        
+        # add from attribute if not given
         if 'from' not in state.keys():
             state['from'] = f'system.adapter.{self.namespace}'
+
         await self._states.set_state(id, state)
     
     async def subscribe_states(self, pattern:str) -> None:
@@ -117,3 +133,16 @@ class Adapter:
     async def get_object_updates(self) -> dict:
         """get subscribed state changes"""
         return await self._objects.get_message()
+    
+    def _validate_id(self, id:str) -> None:
+        """validate that id fits our restrictions
+            if id is invalid an error is raised
+        """
+        if type(id) is not str:
+            raise TypeError(f'The id has an invalid type! Expected "string", received "{type(id)}".')
+            
+        if id == '':
+            raise ValueError('The id is empty! Please provide a valid id.')
+            
+        if id.endswith('.'):
+            raise ValueError('The id is invalid. Ids are not allowed to end in "."')
