@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Tue Apr 14 11:57:49 2020
@@ -8,30 +8,47 @@ Created on Tue Apr 14 11:57:49 2020
 
 from adapter import Adapter
 import json
-import time
+import asyncio
 
-adapter = Adapter('hm-rpc', 'hm-rpc.0')
-
-adapter.set_object('testObj', json.loads('{\
-        "type": "state",\
-        "common": {\
-                }\
-        }'
-        ))
-
-testObj = adapter.get_foreign_object('hm-rpc.1.testObj')
-
-adapter.subscribe_objects('*')
-adapter.subscribe_states('*')
-
-while (True):
-    new_object_update = adapter.get_object_updates()
-    if new_object_update != None:
-        print(f'new objects update: \n {new_object_update}')
+async def main():
+    adapter = Adapter('hm-rpc', 'hm-rpc.0')
+    await adapter.prepare_for_use()
     
-    new_state_update = adapter.get_state_updates()
-    if (new_state_update != None):
-        print(f'new state update: \n {new_state_update}')
-       
-    # this is important, because of cpu usage
-    time.sleep(0.2)
+    await adapter.set_object('testObj', json.loads('{\
+            "type": "state",\
+            "common": {\
+                    }\
+            }'
+            ))
+    
+    testObj = await adapter.get_foreign_object('hm-rpc.0.testObj')
+    await adapter.set_state('testing', {'val1': True})
+    testState = await adapter.get_state('testing')
+    
+    print(testState)
+    print(testObj)
+    
+    await adapter.subscribe_objects('*')
+    await adapter.subscribe_states('*')
+    
+    async def handle_object_updates():
+        # listen to object changes
+        while (True):
+            objId, obj = await adapter.get_object_updates()
+            print(f'object change of {objId}:\n{obj}')
+            
+    async def handle_state_updates():
+        # listen to state changes
+        while (True):
+            stateId, state = await adapter.get_state_updates()
+            print(f'state change of {stateId}:\n{state}')
+    
+    # register your state handlers
+    asyncio.create_task(handle_object_updates())
+    asyncio.create_task(handle_state_updates())
+    
+    while (True):
+        # Do what you like here
+        await asyncio.sleep(0.2)
+                     
+asyncio.run(main())

@@ -6,8 +6,9 @@ Created on Tue Apr 14 11:08:36 2020
 @author: moritz
 """
 
-import redis
+import aioredis
 import json
+import time
 
 class StatesDB:
     
@@ -15,40 +16,42 @@ class StatesDB:
         self.port = port
         self.namespace = f'{namespace}.'
         
-        self.redis = redis.Redis(host='localhost', port=port, db=0)
-        self.pub_sub = self.redis.pubsub()
+    async def init_db(self) -> None:
+        self.redis = await aioredis.create_redis(('localhost', self.port))
+        self.subs_receiver = aioredis.pubsub.Receiver()
         
-    def set_state(self, id:str=None, state:dict={}) -> None:
+    async def set_state(self, id:str=None, state:dict={}) -> None:
         """Set state in db and publish"""
+        state['ts'] = int(time.time())
         # check if we set with expire         
         if 'expire' not in state.keys():
             # set state as string
-            self.redis.set(f'{self.namespace}{id}', json.dumps(state))
+            await self.redis.set(f'{self.namespace}{id}', json.dumps(state))
         else:
-            self.redis.setex(f'{self.namespace}{id}', state['expire'], 
+            await self.redis.setex(f'{self.namespace}{id}', state['expire'], 
                              value=json.dumps(state))
         # publish state
-        self.redis.publish(f'{self.namespace}{id}', json.dumps(state))
+        await self.redis.publish(f'{self.namespace}{id}', json.dumps(state))
 
         
-    def get_state(self, id:str=None) -> dict:
+    async def get_state(self, id:str=None) -> dict:
         """get object out of redis db and parse"""
-        state:dict = json.loads(self.redis.get(f'{self.namespace}{id}'))
+        state:dict = json.loads(await self.redis.get(f'{self.namespace}{id}'))
         return state
     
-    def subscribe(self, pattern:str) -> None:
+    async def subscribe(self, pattern:str) -> None:
         """subscribe to state changes"""
-        self.pub_sub.psubscribe(f'{self.namespace}{pattern}')
+        await self.redis.psubscribe(self.subs_receiver.pattern(f'{self.namespace}{pattern}'))
         
-    def unsubscribe(self, pattern:str) -> None:
+    async def unsubscribe(self, pattern:str) -> None:
         """unsubscribe from object chamges"""
-        self.pub_sub.punsubscribe(f'{self.namespace}{pattern}')
+        await self.redis.punsubscribe(f'{self.namespace}{pattern}')
         
-    def get_message(self) -> dict:
+    async def get_message(self) -> dict:
         """get subscribed messages if some there"""
-        msg:dict = self.pub_sub.get_message(ignore_subscribe_messages=True)
-        if msg != None:
-            msgId = msg['channel'][len(self.namespace):]
-            msg = json.loads(msg['data'])
-            msg['id'] = msgId
-        return msg        
+        while await self.subs_receiver.wait_message():
+            sender, msg = await self.subs_receiver.get()
+            if type(msg) == tuple:
+                state:dict = json.loads(msg[1])
+                id:str = msg[0][len(self.namespace):]
+                return id, state             

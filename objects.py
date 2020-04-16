@@ -6,8 +6,9 @@ Created on Tue Apr 14 11:08:04 2020
 @author: moritz
 """
 
-import redis
+import aioredis
 import json
+import time
 
 class ObjectsDB:
     
@@ -16,34 +17,36 @@ class ObjectsDB:
         self.objectNamespace = f'{namespace}.o.'
         self.fileNamespace = f'{namespace}.f.'
         
-        self.redis = redis.Redis(host='localhost', port=port, db=0)
-        self.pub_sub = self.redis.pubsub()
+    async def init_db(self) -> None:
+        self.redis = await aioredis.create_redis(('localhost', self.port))
+        self.subs_receiver = aioredis.pubsub.Receiver()
         
-    def set_object(self, id:str=None, obj:dict={}) -> None:
+    async def set_object(self, id:str=None, obj:dict={}) -> None:
         """Set object in db and publish"""
+        obj['ts'] = int(time.time())
         # set object as string
-        self.redis.set(f'{self.objectNamespace}{id}', json.dumps(obj))
+        await self.redis.set(f'{self.objectNamespace}{id}', json.dumps(obj))
         # publish object
-        self.redis.publish(f'{self.objectNamespace}{id}', json.dumps(obj))
+        await self.redis.publish(f'{self.objectNamespace}{id}', json.dumps(obj))
         
-    def get_object(self, id:str=None) -> dict:
+    async def get_object(self, id:str=None) -> dict:
         """get object out of redis db and parse"""
-        obj:dict = json.loads(self.redis.get(f'{self.objectNamespace}{id}'))
+        obj:dict = json.loads(await self.redis.get(f'{self.objectNamespace}{id}'))
         return obj
     
-    def subscribe(self, pattern:str) -> None:
+    async def subscribe(self, pattern:str) -> None:
         """subscribe to state changes"""
-        self.pub_sub.psubscribe(f'{self.objectNamespace}{pattern}')
+        await self.redis.psubscribe(self.subs_receiver.pattern(f'{self.objectNamespace}{pattern}'))
         
-    def unsubscribe(self, pattern:str) -> None:
+    async def unsubscribe(self, pattern:str) -> None:
         """unsubscribe from state chamges"""
-        self.pub_sub.punsubscribe(f'{self.objectNamespace}{pattern}')
+        await self.redis.punsubscribe(f'{self.objectNamespace}{pattern}')
         
-    def get_message(self) -> dict:
+    async def get_message(self) -> dict:
         """get subscribed messages if some there"""
-        msg:dict = self.pub_sub.get_message(ignore_subscribe_messages=True)
-        if msg != None:
-            msgId = msg['channel'][len(self.objectNamespace):]
-            msg = json.loads(msg['data'])
-            msg['id'] = msgId
-        return msg
+        while await self.subs_receiver.wait_message():
+            sender, msg = await self.subs_receiver.get()
+            if type(msg) == tuple:
+                obj:dict = json.loads(msg[1])
+                id:str = msg[0][len(self.objectNamespace):]
+                return id, obj
