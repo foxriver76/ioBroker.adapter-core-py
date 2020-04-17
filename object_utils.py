@@ -37,8 +37,34 @@ ACCESS_LIST        = 'list'
 ACCESS_DELETE      = 'delete'
 ACCESS_CREATE      = 'create'
 
-def check_object(object, options:dict, flag) -> None:
+def check_object(obj, options:dict, flag) -> None:
     """check if access to object should be granted, else throw PermissionError"""
-    #todo
-    if ('user' in options.keys()):
-        raise PermissionError(f'{options.user} does not have permission')
+    if 'acl' not in obj.keys() or 'common' not in 'acl' not in obj.keys() or flag == ACCESS_LIST:
+        # no acl configured for this object or no common
+        return
+    
+    if 'user' in options.keys():
+        if options['user'] == SYSTEM_ADMIN_USER:
+            # admin has all perms
+            return
+            
+    if 'group' in options.keys():
+        if options['group'] == SYSTEM_ADMIN_GROUP:
+            # admin group has all perms
+            return
+            
+    if 'groups' in options.keys():
+        if SYSTEM_ADMIN_GROUP in options['group']:
+            # admin group has all perms
+            return
+        
+    if obj['acl']['owner'] != options['user']:
+        # owner is not user who wants access, maybe group fits
+        if 'group' in options.keys() and options['group'] == obj['acl']['ownerGroup'] or 'groups' in options.keys() and obj['acl']['ownerGroup'] in options['groups']:
+            if not (obj['acl']['object'] & (flag << 4)):
+                raise PermissionError()
+            elif not (obj['acl']['object'] & flag):
+                raise PermissionError()
+    elif not (obj['acl']['object'] &  (flag << 8)):
+        # check group rights
+        raise PermissionError()
