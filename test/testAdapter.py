@@ -58,53 +58,56 @@ class TestAdapter(unittest.TestCase):
     def test_get_object_permissions(self):
         self.assertRaises(PermissionError, _run, self.adapter.get_object('testObj1', {'user': 'system.user.max'}))
         
-    def subscribe_foreign_states(self):
-        _run(self.adapter.subscribe_foreign_states('hm-rpc.0.*'))
-        loop = asyncio.get_event_loop()
-        
-        async def handle_state_changes():
-            print('now waiting')
-            stateId, state = await self.adapter.get_state_updates()
-            print(f'state change of {stateId}:\n{state}')
-            return
-            if not stateId.startswith('hm-rpc.0'):
-                self.assertTrue(False, msg=f'Only hm-rpc.0* is subscribed, but got {stateId}')
-                    
-        _run(self.adapter.set_foreign_state('test.0.testing', {'val': 5}))
-        _run(self.adapter.set_foreign_state('hm.rpc.0.device.ch.state', 
-                                            {'val': 3}))
-        
-        loop = asyncio.get_event_loop()
-        loop.create_task(handle_state_changes())
+    def test_subscribe_foreign_states(self):
+        async def subscribe_froeign_states():
+            await self.adapter.subscribe_foreign_states('hm-rpc.0.*')
             
-        loop.run_forever()
-         
-        """
-    async def main(self):                            
-        await self.adapter.subscribe_objects('*')
-        await self.adapter.subscribe_states('*')
-        
-        await self.adapter.set_state('test', {'val': 5, 'expire': 2})
-        
-        async def handle_object_updates():
-            # listen to object changes
+            set_state:dict = {'val': 5, 'expire': 1}
+            await self.adapter.set_state('test', set_state)
+            await self.adapter.set_foreign_state('hm-rega.0.test', {'val': '3'})
+            
+            count:int = 0
+            
             while (True):
-                objId, obj = await self.adapter.get_object_updates()
-                print(f'object change of {objId}:\n{obj}')
+                state_id, state = await self.adapter.get_state_updates()
                 
-        async def handle_state_updates():
-            # listen to state changes
-            while (True):
-                stateId, state = await self.adapter.get_state_updates()
-                print(f'state change of {stateId}:\n{state}')
-        
-        # register your state handlers
-        asyncio.create_task(handle_object_updates())
-        asyncio.create_task(handle_state_updates())
+                # check if correct state or expire
+                if state_id == 'hm-rpc.0.test' and (set_state == state or state == {}):
+                    count += 1
+                    if count == 2:
+                        loop.stop()   
+                else:
+                    self.assertTrue(False, f'hm-rpc.0.* subscribed, but got {state_id}')
             
-        while (True):
-            # Do what you like here
-            await asyncio.sleep(0.2)"""
+        loop = asyncio.get_event_loop()
+        loop.create_task(subscribe_froeign_states())
+        loop.run_forever()
+        
+    def test_subscribe_foreign_objects(self):
+        async def subscribe_foreign_objects():
+            await self.adapter.subscribe_objects('tes*')
+            
+            set_object:dict = {'type': 'state', 
+                              'common': {
+                                      'name': 'hello',
+                                      'type': 'string'
+                                      }
+                              }
+                              
+            await self.adapter.set_object('testing', set_object)
+            await self.adapter.set_object('notMatching', {'type' : 'meta'})
+
+            while (True):
+                obj_id, obj = await self.adapter.get_object_updates()
+                # check if correct state or expire
+                if obj_id == 'hm-rpc.0.testing' and set_object == obj:
+                        loop.stop()   
+                else:
+                    self.assertTrue(False, f'hm-rpc.0.* subscribed, but got {obj_id}')
+            
+        loop = asyncio.get_event_loop()
+        loop.create_task(subscribe_foreign_objects())
+        loop.run_forever()
         
 if __name__ == '__main__':
     unittest.main()

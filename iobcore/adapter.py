@@ -101,7 +101,7 @@ class Adapter:
     
     async def subscribe_states(self, pattern:str) -> None:
         """subscribe to state changes"""
-        await self.subscribe_foreign_states(f'{self.namespace}{pattern}')
+        await self.subscribe_foreign_states(f'{self.namespace}.{pattern}')
         
     async def subscribe_foreign_states(self, pattern:str) -> None:
         """subscribe to foreign state changes"""
@@ -109,7 +109,7 @@ class Adapter:
 
     async def subscribe_objects(self, pattern:str) -> None:
         """subscribe to object changes"""
-        await self.subscribe_foreign_objects(f'{self.namespace}{pattern}')
+        await self.subscribe_foreign_objects(f'{self.namespace}.{pattern}')
         
     async def subscribe_foreign_objects(self, pattern:str) -> None:
         """subscribe to foreign state changes"""
@@ -117,7 +117,7 @@ class Adapter:
         
     async def unsubscribe_states(self, pattern:str) -> None:
         """unsubscribe to state changes"""
-        await self.unsubscribe_foreign_states(f'{self.namespace}{pattern}')
+        await self.unsubscribe_foreign_states(f'{self.namespace}.{pattern}')
         
     async def unsubscribe_foreign_states(self, pattern:str) -> None:
         """unsubscribe to foreign state changes"""
@@ -125,7 +125,7 @@ class Adapter:
 
     async def unsubscribe_objects(self, pattern:str) -> None:
         """unsubscribe to object changes"""
-        await self.unsubscribe_foreign_objects(f'{self.namespace}{pattern}')
+        await self.unsubscribe_foreign_objects(f'{self.namespace}.{pattern}')
         
     async def unsubscribe_foreign_objects(self, pattern:str) -> None:
         """unsubscribe to foreign state changes"""

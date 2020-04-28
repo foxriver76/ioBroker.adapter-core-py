@@ -87,13 +87,13 @@ class StatesDB:
             sender, msg = await self.subs_receiver.get()            
             if type(msg) == tuple:                    
                 state:dict = json.loads(msg[1])
-                id:str = msg[0][len(self.namespace):]
+                id:str = str(msg[0][len(self.namespace):], 'utf-8')
                 return id, state
             else: 
                 # CHECK if expired or evicted received
                 if sender.name == b'__keyevent@0__:expired':
                     print(f'{msg[len(self.namespace):]} expired')
-                    return msg[len(self.namespace):], {}
+                    return str(msg[len(self.namespace):], 'utf-8'), {}
                 elif sender.name == b'__keyevent@0__:evicted':
                     print(f'{msg[len(self.namespace):]} evicted')
-                    return msg[len(self.namespace):], {}
+                    return str(msg[len(self.namespace):], 'utf-8'), {}

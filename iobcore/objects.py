@@ -66,7 +66,7 @@ class ObjectsDB:
             sender, msg = await self.subs_receiver.get()
             if type(msg) == tuple:
                 obj:dict = json.loads(msg[1])
-                id:str = msg[0][len(self.objectNamespace):]
+                id:str = str(msg[0][len(self.objectNamespace):], 'utf-8')
                 return id, obj
             
     async def get_object_list(self, params, options):
