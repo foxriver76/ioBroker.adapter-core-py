@@ -6,6 +6,11 @@ Created on Thu Apr 16 15:39:52 2020
 @author: moritz
 """
 
+import re
+
+reg_user = '^system\.user\.'
+reg_group = '^system\.group\.'
+
 SYSTEM_ADMIN_USER  = 'system.user.admin'
 SYSTEM_ADMIN_GROUP = 'system.group.administrator'
 
@@ -37,7 +42,70 @@ ACCESS_LIST        = 'list'
 ACCESS_DELETE      = 'delete'
 ACCESS_CREATE      = 'create'
 
-def check_object(obj, options:dict, flag) -> None:
+def check_object_rights(objects:dict=None, id:str=None, obj:dict={}, options:dict={}, flag:str=None):
+    """check object rights - throw PermissionError if not granted"""
+    if 'user' not in options.keys():
+        options = {
+                'user': SYSTEM_ADMIN_USER,
+                'params': options,
+                'group': SYSTEM_ADMIN_GROUP,
+                'groups': [SYSTEM_ADMIN_GROUP],
+                'acl': get_default_admin_rights()
+                }
+        
+    if 'acl' not in options.keys():
+        # TODO
+        pass
+        
+    if (options['user'] == SYSTEM_ADMIN_USER or options['group'] == SYSTEM_ADMIN_GROUP
+        or ('groups' in options.keys() and SYSTEM_ADMIN_GROUP in options['groups'])):
+        # ADMIN has all rights
+        return
+    
+    # if user or group objects
+    if re.match(reg_user, id) or re.match(reg_group, id):
+        if flag == ACCESS_WRITE and not options['acl']['users']['write']:
+            raise PermissionError()
+        
+        if flag == ACCESS_READ and not options['acl']['users']['read']:
+            raise PermissionError()
+            
+        if flag == ACCESS_DELETE and not options['acl']['users']['delete']:
+            raise PermissionError()
+            
+        if flag == ACCESS_LIST and not options['acl']['users']['list']:
+            raise PermissionError()
+            
+        if flag == ACCESS_CREATE and not options['acl']['users']['create']:
+            raise PermissionError()
+            
+        # if user may write he may delete
+        if flag == ACCESS_DELETE:
+            flag = ACCESS_WRITE
+        
+   
+    if flag == ACCESS_WRITE and not options['acl']['object']['write']:
+        raise PermissionError()
+        
+    if flag == ACCESS_READ and not options['acl']['object']['read']:
+        raise PermissionError()
+        
+    if flag == ACCESS_DELETE and not options['acl']['object']['delete']:
+        raise PermissionError()
+        
+    if flag == ACCESS_LIST and not options['acl']['object']['list']:
+        raise PermissionError()
+        
+    if flag == ACCESS_DELETE:
+        flag = ACCESS_WRITE
+        
+    if id is not None:
+        check_object(obj, options, flag)
+        return
+    else: 
+        return
+
+def check_object(obj:dict={}, options:dict={}, flag:str=None) -> None:
     """check if access to object should be granted, else throw PermissionError"""
     if 'acl' not in obj.keys() or 'common' not in 'acl' not in obj.keys() or flag == ACCESS_LIST:
         # no acl configured for this object or no common
@@ -68,3 +136,40 @@ def check_object(obj, options:dict, flag) -> None:
     elif not (obj['acl']['object'] &  (flag << 8)):
         # check group rights
         raise PermissionError()
+        
+def get_default_admin_rights(acl:dict=None):
+    acl = {} if acl is None else acl
+    
+    acl['file'] = {
+        'list': True,
+        'read': True,
+        'write': True,
+        'create': True,
+        'delete': True
+    }
+    
+    acl['object'] = {
+        'create': True,
+        'list': True,
+        'read': True,
+        'write': True,
+        'delete': True
+    }
+    
+    acl['users'] = {
+        'create': True,
+        'list': True,
+        'read': True,
+        'write': True,
+        'delete': True
+    }
+    
+    acl['state'] = {
+        'read': True,
+        'write': True,
+        'delete': True,
+        'create': True,
+        'list': True
+    }
+
+    return acl
