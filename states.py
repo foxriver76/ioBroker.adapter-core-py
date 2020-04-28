@@ -10,6 +10,7 @@ import aioredis
 import json
 import time
 
+# TODO: save ioBroker subscriptions and if expired or evicted of subscribed id then return it else jsut await own function again
 class StatesDB:
     
     def __init__(self, port:int=6379, namespace:str='io'):
@@ -20,8 +21,10 @@ class StatesDB:
         self.redis = await aioredis.create_redis(('localhost', self.port))
         self.redis_sub = await aioredis.create_redis(('localhost', self.port))
         self.subs_receiver = aioredis.pubsub.Receiver()
-        # TODO: activate keyspace events in config
-        await self.redis_sub.psubscribe(self.subs_receiver.pattern('__keyspace@0__:*'))
+        # activate keyspace events in config and subscribe to changes
+        await self.redis_sub.config_set('notify-keyspace-events', 'Exe')
+        await self.redis_sub.subscribe(self.subs_receiver.channel('__keyevent@0__:expired'))
+        await self.redis_sub.subscribe(self.subs_receiver.channel('__keyevent@0__:evicted'))
         
     async def set_state(self, id:str=None, state:dict={}) -> None:
         """Set state in db and publish"""
@@ -81,8 +84,16 @@ class StatesDB:
     async def get_message(self) -> dict:
         """get subscribed messages if some there"""
         while await self.subs_receiver.wait_message():
-            sender, msg = await self.subs_receiver.get()
-            if type(msg) == tuple:
+            sender, msg = await self.subs_receiver.get()            
+            if type(msg) == tuple:                    
                 state:dict = json.loads(msg[1])
                 id:str = msg[0][len(self.namespace):]
                 return id, state
+            else: 
+                # CHECK if expired or evicted received
+                if sender.name == b'__keyevent@0__:expired':
+                    print(f'{msg[len(self.namespace):]} expired')
+                    return msg[len(self.namespace):], {}
+                elif sender.name == b'__keyevent@0__:evicted':
+                    print(f'{msg[len(self.namespace):]} evicted')
+                    return msg[len(self.namespace):], {}
