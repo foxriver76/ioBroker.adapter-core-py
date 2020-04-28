@@ -18,7 +18,10 @@ class StatesDB:
         
     async def init_db(self) -> None:
         self.redis = await aioredis.create_redis(('localhost', self.port))
+        self.redis_sub = await aioredis.create_redis(('localhost', self.port))
         self.subs_receiver = aioredis.pubsub.Receiver()
+        # TODO: activate keyspace events in config
+        await self.redis_sub.psubscribe(self.subs_receiver.pattern('__keyspace@0__:*'))
         
     async def set_state(self, id:str=None, state:dict={}) -> None:
         """Set state in db and publish"""
@@ -69,11 +72,11 @@ class StatesDB:
     
     async def subscribe(self, pattern:str) -> None:
         """subscribe to state changes"""
-        await self.redis.psubscribe(self.subs_receiver.pattern(f'{self.namespace}{pattern}'))
+        await self.redis_sub.psubscribe(self.subs_receiver.pattern(f'{self.namespace}{pattern}'))
         
     async def unsubscribe(self, pattern:str) -> None:
         """unsubscribe from object chamges"""
-        await self.redis.punsubscribe(f'{self.namespace}{pattern}')
+        await self.redis_sub.punsubscribe(f'{self.namespace}{pattern}')
         
     async def get_message(self) -> dict:
         """get subscribed messages if some there"""
@@ -82,4 +85,4 @@ class StatesDB:
             if type(msg) == tuple:
                 state:dict = json.loads(msg[1])
                 id:str = msg[0][len(self.namespace):]
-                return id, state             
+                return id, state

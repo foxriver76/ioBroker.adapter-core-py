@@ -35,6 +35,8 @@ async def main():
     await adapter.subscribe_objects('*')
     await adapter.subscribe_states('*')
     
+    await adapter.set_state('test', {'val': 5, 'expire': 2})
+    
     async def handle_object_updates():
         # listen to object changes
         while (True):
@@ -50,7 +52,7 @@ async def main():
     # register your state handlers
     asyncio.create_task(handle_object_updates())
     asyncio.create_task(handle_state_updates())
-    
+        
     while (True):
         # Do what you like here
         await asyncio.sleep(0.2)

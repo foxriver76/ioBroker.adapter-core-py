@@ -20,6 +20,7 @@ class ObjectsDB:
         
     async def init_db(self) -> None:
         self.redis = await aioredis.create_redis(('localhost', self.port))
+        self.redis_sub = await aioredis.create_redis(('localhost', self.port))
         self.subs_receiver = aioredis.pubsub.Receiver()
         
     async def set_object(self, id:str=None, obj:dict={}, options:dict={}) -> None:
@@ -53,11 +54,11 @@ class ObjectsDB:
     async def subscribe(self, pattern:str, options:dict={}) -> None:
         """subscribe to object changes, if permissions allow it"""
         await utils.check_object_rights(self, None, None, options, 'list')
-        await self.redis.psubscribe(self.subs_receiver.pattern(f'{self.objectNamespace}{pattern}'))
+        await self.redis_sub.psubscribe(self.subs_receiver.pattern(f'{self.objectNamespace}{pattern}'))
         
     async def unsubscribe(self, pattern:str) -> None:
         """unsubscribe from state chamges"""
-        await self.redis.punsubscribe(f'{self.objectNamespace}{pattern}')
+        await self.redis_sub.punsubscribe(f'{self.objectNamespace}{pattern}')
         
     async def get_message(self) -> dict:
         """get subscribed messages if some there"""
