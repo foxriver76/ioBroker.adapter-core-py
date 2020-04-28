@@ -71,5 +71,5 @@ class ObjectsDB:
             
     async def get_object_list(self, params, options):
         """returns all objects matching params.starkey to params.endkey"""
-        # TODO
+        # TODO: implement this to finish check_objects_rights implementation
         pass

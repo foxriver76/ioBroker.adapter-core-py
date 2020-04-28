@@ -9,8 +9,8 @@ Created on Tue Apr 14 11:08:36 2020
 import aioredis
 import json
 import time
+import fnmatch
 
-# TODO: save ioBroker subscriptions and if expired or evicted of subscribed id then return it else jsut await own function again
 class StatesDB:
     
     def __init__(self, port:int=6379, namespace:str='io'):
@@ -84,7 +84,7 @@ class StatesDB:
     async def get_message(self) -> dict:
         """get subscribed messages if some there"""
         while await self.subs_receiver.wait_message():
-            sender, msg = await self.subs_receiver.get()            
+            sender, msg = await self.subs_receiver.get()   
             if type(msg) == tuple:                    
                 state:dict = json.loads(msg[1])
                 id:str = str(msg[0][len(self.namespace):], 'utf-8')
@@ -92,8 +92,14 @@ class StatesDB:
             else: 
                 # CHECK if expired or evicted received
                 if sender.name == b'__keyevent@0__:expired':
-                    print(f'{msg[len(self.namespace):]} expired')
-                    return str(msg[len(self.namespace):], 'utf-8'), {}
+                    # check if it matches our subscriptions
+                    for pattern in self.subs_receiver.patterns:
+                        if fnmatch.fnmatch(msg, pattern):
+                            print(f'{msg[len(self.namespace):]} expired')
+                            return str(msg[len(self.namespace):], 'utf-8'), {}
                 elif sender.name == b'__keyevent@0__:evicted':
-                    print(f'{msg[len(self.namespace):]} evicted')
-                    return str(msg[len(self.namespace):], 'utf-8'), {}
+                    # check if it matches our subscriptions
+                    for pattern in self.subs_receiver.patterns:
+                        if fnmatch.fnmatch(msg, pattern):
+                            print(f'{msg[len(self.namespace):]} evicted. Please check your maxMemory settings for your redis instance!')
+                            return str(msg[len(self.namespace):], 'utf-8'), {}              
