@@ -6,8 +6,9 @@ Created on Tue Apr 14 11:08:48 2020
 @author: moritz
 """
 
-from states import StatesDB
-from objects import ObjectsDB
+from iobcore.states import StatesDB
+from iobcore.objects import ObjectsDB
+import logging
 
 class Adapter:
     
@@ -38,21 +39,21 @@ class Adapter:
                 'from': f'system.adapter.{self.namespace}'
                 })
         
-    async def get_object(self, id:str) -> dict:
+    async def get_object(self, id:str, options:dict={}) -> dict:
         """returns object of adapters namespace"""
         id = f'{self.namespace}.{id}'
-        return await self.get_foreign_object(id)
+        return await self.get_foreign_object(id, options)
     
     async def get_object_list(self, params:dict={}, options:dict={}):
         """get all objects matching the startkey and endkey"""
         return await self._objects.get_object_list(params, options)        
     
-    async def get_foreign_object(self, id:str) -> dict:
+    async def get_foreign_object(self, id:str, options:dict={}) -> dict:
         """returns object"""
         #  validate that id does not violate our db pattern
         self._validate_id(id)
         
-        return await self._objects.get_object(id)
+        return await self._objects.get_object(id, options)
     
     async def set_object(self, id:str, obj:dict) -> None:
         """set object to adapters namespace"""

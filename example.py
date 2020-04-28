@@ -6,20 +6,17 @@ Created on Tue Apr 14 11:57:49 2020
 @author: moritz
 """
 
-from adapter import Adapter
-import json
+from iobcore.adapter import Adapter
 import asyncio
 
 async def main():
     adapter = Adapter('hm-rpc', 'hm-rpc.0')
     await adapter.prepare_for_use()
     
-    await adapter.set_object('testObj', json.loads('{\
-            "type": "state",\
-            "common": {\
-                    }\
-            }'
-            ))
+    await adapter.set_object('testObj', {
+            'type': 'state',
+            'common': {}
+            })
     
     try:
         testObj = await adapter.get_foreign_object('hm-rpc.0.testObj.')

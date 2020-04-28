@@ -58,7 +58,7 @@ async def check_object_rights(objects:dict=None, id:str=None, obj:dict={}, optio
         options['acl'] = {} if acl is None else acl
         options['groups'] = groups
         options['group'] = None if groups is None else groups[0]
-        return check_object_rights(objects, id, obj, options, flag)
+        return await check_object_rights(objects, id, obj, options, flag)
         
     if (options['user'] == SYSTEM_ADMIN_USER or options['group'] == SYSTEM_ADMIN_GROUP
         or ('groups' in options.keys() and SYSTEM_ADMIN_GROUP in options['groups'])):
@@ -178,5 +178,39 @@ def get_default_admin_rights(acl:dict=None):
     return acl
 
 def get_user_group(objects:dict, user:str):
-    # TODO
-    return '', '', {}
+    acl = {}
+    
+    # TODO    
+    acl['file'] = {
+        'list': False,
+        'read': False,
+        'write': False,
+        'create': False,
+        'delete': False
+    }
+    
+    acl['object'] = {
+        'create': False,
+        'list': False,
+        'read': False,
+        'write': False,
+        'delete': False
+    }
+    
+    acl['users'] = {
+        'create': False,
+        'list': False,
+        'read': False,
+        'write': False,
+        'delete': False
+    }
+    
+    acl['state'] = {
+        'read': False,
+        'write': False,
+        'delete': False,
+        'create': False,
+        'list': False
+    }
+    
+    return user, [''], acl

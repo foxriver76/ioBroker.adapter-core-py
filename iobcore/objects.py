@@ -9,7 +9,7 @@ Created on Tue Apr 14 11:08:04 2020
 import aioredis
 import json
 import time
-import object_utils as utils
+import iobcore.object_utils as utils
 
 class ObjectsDB:
     
@@ -27,7 +27,7 @@ class ObjectsDB:
         """Set object in db and publish"""
         # check if access to object should be granted
         await utils.check_object_rights(self, id, obj, options, utils.ACCESS_WRITE)
-        
+            
         if 'ts' not in obj.keys():
             obj['ts'] = int(time.time())
             
