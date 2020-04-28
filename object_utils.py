@@ -54,8 +54,11 @@ def check_object_rights(objects:dict=None, id:str=None, obj:dict={}, options:dic
                 }
         
     if 'acl' not in options.keys():
-        # TODO
-        pass
+        _user, groups, acl = get_user_group(objects, options['user'])
+        options['acl'] = {} if acl is None else acl
+        options['groups'] = groups
+        options['group'] = None if groups is None else groups[0]
+        return check_object_rights(objects, id, obj, options, flag)
         
     if (options['user'] == SYSTEM_ADMIN_USER or options['group'] == SYSTEM_ADMIN_GROUP
         or ('groups' in options.keys() and SYSTEM_ADMIN_GROUP in options['groups'])):
@@ -173,3 +176,7 @@ def get_default_admin_rights(acl:dict=None):
     }
 
     return acl
+
+def get_user_group(objects:dict, user:str):
+    # TODO
+    return '', '', {}

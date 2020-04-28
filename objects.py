@@ -66,3 +66,8 @@ class ObjectsDB:
                 obj:dict = json.loads(msg[1])
                 id:str = msg[0][len(self.objectNamespace):]
                 return id, obj
+            
+    async def get_object_list(self, params, options):
+        """returns all objects matching params.starkey to params.endkey"""
+        # TODO
+        pass
