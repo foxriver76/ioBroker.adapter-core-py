@@ -43,6 +43,10 @@ class Adapter:
         id = f'{self.namespace}.{id}'
         return await self.get_foreign_object(id)
     
+    async def get_object_list(self, params:dict={}, options:dict={}):
+        """get all objects matching the startkey and endkey"""
+        return await self._objects.get_object_list(params, options)        
+    
     async def get_foreign_object(self, id:str) -> dict:
         """returns object"""
         #  validate that id does not violate our db pattern

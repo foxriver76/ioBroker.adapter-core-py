@@ -42,7 +42,7 @@ ACCESS_LIST        = 'list'
 ACCESS_DELETE      = 'delete'
 ACCESS_CREATE      = 'create'
 
-def check_object_rights(objects:dict=None, id:str=None, obj:dict={}, options:dict={}, flag:str=None):
+async def check_object_rights(objects:dict=None, id:str=None, obj:dict={}, options:dict={}, flag:str=None):
     """check object rights - throw PermissionError if not granted"""
     if 'user' not in options.keys():
         options = {

@@ -25,7 +25,7 @@ class ObjectsDB:
     async def set_object(self, id:str=None, obj:dict={}, options:dict={}) -> None:
         """Set object in db and publish"""
         # check if access to object should be granted
-        utils.check_object_rights(self, id, obj, options, utils.ACCESS_WRITE)
+        await utils.check_object_rights(self, id, obj, options, utils.ACCESS_WRITE)
         
         if 'ts' not in obj.keys():
             obj['ts'] = int(time.time())
@@ -46,12 +46,13 @@ class ObjectsDB:
             # obj is not a valid json, probably non existing
             obj:dict = {}
         # check if access to object should be granted
-        utils.check_object_rights(self, id, obj, options, utils.ACCESS_READ)
+        await utils.check_object_rights(self, id, obj, options, utils.ACCESS_READ)
         
         return obj
     
-    async def subscribe(self, pattern:str) -> None:
-        """subscribe to state changes"""
+    async def subscribe(self, pattern:str, options:dict={}) -> None:
+        """subscribe to object changes, if permissions allow it"""
+        await utils.check_object_rights(self, None, None, options, 'list')
         await self.redis.psubscribe(self.subs_receiver.pattern(f'{self.objectNamespace}{pattern}'))
         
     async def unsubscribe(self, pattern:str) -> None:
