@@ -82,6 +82,23 @@ class StatesDB:
         """unsubscribe from object chamges"""
         await self.redis_sub.punsubscribe(f'{self.namespace}{pattern}')
         
+    async def get_states(self, keys:list) -> list:
+        """get all states of a list"""
+        _keys:list = []
+        for key in keys:
+            _keys.append(f'{self.namespace}{key}')
+            
+        states:list =  await self.redis.mget(*_keys)
+        _states:list = []
+        
+        for state in states:
+            if state is not None:
+                state:dict = json.loads(state)
+            _states.append(state)
+            
+        return _states
+            
+        
     async def get_keys(self, pattern:str) -> list:
         """get keys matching pattern as list"""
         cur = b'0'

@@ -130,6 +130,18 @@ class TestAdapter(unittest.TestCase):
         
         for i in range(20):
             self.assertTrue(f'hm-rpc.0.test_get_states{i}' in states)
+            
+    def test_get_states(self):
+        for i in range(20):
+            _run(self.adapter.set_foreign_state(f'hm-rpc.0.test_get_states{i}', {'val': i}))
+            
+        keys:list = _run(self.adapter.get_keys('hm-rpc.0.test_get_states*'))
+        states:list = _run(self.adapter.get_states(keys))
+        
+        # check correct order
+        for i in range(len(keys)):
+            val:str = str(states[i]['val'])
+            self.assertTrue(keys[i].endswith(val))        
 
 if __name__ == '__main__':
     unittest.main()

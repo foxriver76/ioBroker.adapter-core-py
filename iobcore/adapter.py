@@ -78,6 +78,8 @@ class Adapter:
             
     async def init_logging(self) -> None:
         """init logging, store who wants our logs"""
+        # get all logging states
+        keys:list = await self._states.get_keys('*.logging')
         await self.subscribe_foreign_states('*.logging')
         
     def change_object_cb(self, obj_cb):
@@ -122,6 +124,9 @@ class Adapter:
         """returns state of adapters namespace"""
         id:str = f'{self.namespace}.{id}'
         return await self.get_foreign_state(id)
+    
+    async def get_states(self, keys:list) -> list:
+        return await self._states.get_states(keys)
     
     async def get_foreign_state(self, id:str) -> dict:
         """returns state"""
