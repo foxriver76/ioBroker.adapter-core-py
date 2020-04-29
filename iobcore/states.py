@@ -10,6 +10,7 @@ import aioredis
 import json
 import time
 import fnmatch
+import random
 
 class StatesDB:
     
@@ -18,6 +19,8 @@ class StatesDB:
         self.namespace = f'{namespace}.'
         self.namespace_log = 'log.'
         
+        self.global_log_id = round(random.random() * 100000000)
+   
     async def init_db(self) -> None:
         self.redis = await aioredis.create_redis(('localhost', self.port))
         self.redis_sub = await aioredis.create_redis(('localhost', self.port))
@@ -30,7 +33,7 @@ class StatesDB:
     async def set_state(self, id:str=None, state:dict={}) -> None:
         """Set state in db and publish"""
         if 'ts' not in state.keys():
-            state['ts'] = int(time.time())
+            state['ts'] = int(time.time() * 100)
             
         if 'ack' not in state.keys():
             state['ack'] = False
@@ -114,10 +117,16 @@ class StatesDB:
         _keys.sort()
         return _keys
     
-    async def push_log(self, id:str, log:dict) -> None:
+    def push_log(self, id:str, log:dict) -> None:
         """push log to given instance via redis"""
-        pass # todo
-        
+        self.global_log_id += 1
+        if self.global_log_id >= 0xFFFFFFFF:
+            self.global_log_id = 0
+            
+        log['_id'] = self.global_log_id
+        print(f'push to {id}')
+        self.redis.publish(f'{self.namespace_log}{id}', json.dumps(log))
+                
     async def get_message(self) -> dict:
         """get subscribed messages if some there"""
         while await self.subs_receiver.wait_message():

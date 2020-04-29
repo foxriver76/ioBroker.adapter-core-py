@@ -9,16 +9,13 @@ Created on Tue Apr 14 11:57:49 2020
 from iobcore.adapter import Adapter
 import asyncio
 
-
-
-
 async def main():
     
     def handle_object_updates(obj_id, obj):
-        print(f'got obj {obj_id} {obj}')
+        adapter.log(f'got obj {obj_id} {obj}', 'warn')
       
     def handle_state_updates(state_id, state):
-        print(f'got state {state_id} {state}')
+        adapter.log(f'got state {state_id} {state}', 'warn')
     
     adapter = Adapter('hm-rpc', 'hm-rpc.0', handle_state_updates, handle_object_updates)
     await adapter.prepare_for_use()
@@ -30,9 +27,9 @@ async def main():
     
     try:
         testObj = await adapter.get_foreign_object('hm-rpc.0.testObj.')
-        print(testObj)
+        adapter.log(testObj, 'warn')
     except Exception as e:
-        print(e)
+        adapter.log(e, 'error')
         
     await adapter.set_state('testing', {'val1': True})
     testState = await adapter.get_state('testing')
@@ -43,17 +40,6 @@ async def main():
     await adapter.subscribe_states('*')
     
     await adapter.set_state('test', {'val': 5, 'expire': 2})
-    
-    def handle_object_updates(obj_id, obj):
-        print(f'got obj {obj_id} {obj}')
-          
-    def handle_state_updates(state_id, state):
-        print(f'got state {state_id} {state}')
-
-    
-    # register your state handlers
-#    asyncio.create_task(handle_object_updates())
-#    asyncio.create_task(handle_state_updates())
         
     while (True):
         # Do what you like here

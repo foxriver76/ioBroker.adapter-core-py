@@ -141,7 +141,7 @@ class TestAdapter(unittest.TestCase):
         # check correct order
         for i in range(len(keys)):
             val:str = str(states[i]['val'])
-            self.assertTrue(keys[i].endswith(val))        
+            self.assertTrue(keys[i].endswith(val))    
 
 if __name__ == '__main__':
     unittest.main()

@@ -7,18 +7,17 @@ Created on Tue Apr 14 11:08:48 2020
 """
 
 # TODOs:
-# get all logging states at the beginning and adjust loglist
-# pushLog on every log + implement pushLog in statesDB
+# use real logger
 
 from iobcore.states import StatesDB
 from iobcore.objects import ObjectsDB
 import asyncio
 import fnmatch
-import random
+import time
 
 class Adapter:
     
-    def __init__(self, name:str, namespace:str, state_cb=None, obj_cb=None) -> None:
+    def __init__(self, name:str, namespace:str, state_cb=None, obj_cb=None, logfile:str='log.log') -> None:
         self.name = name
         self.namespace = namespace
         
@@ -26,7 +25,6 @@ class Adapter:
         self.obj_cb = obj_cb
         
         self.log_list = []
-        self.global_log_id = round(random.random() * 100000000)
           
         self._objects = ObjectsDB()
         self._states = StatesDB()
@@ -87,7 +85,7 @@ class Adapter:
         for i in range(len(keys)):
             # all True states want our log
             if states[i]['val'] is True and keys[i] not in self.log_list:
-                self.log_list.append(keys[i])
+                self.log_list.append(keys[i][:-len(".logging")])
                 
         # now we subscribe to changes on logging        
         await self.subscribe_foreign_states('*.logging')
@@ -205,8 +203,11 @@ class Adapter:
         """get subscribed state changes"""
         return await self._objects.get_message()
     
-    async def log(self, severity:str='info') -> None:
-        pass
+    def log(self, message:str, severity:str='info') -> None:
+        print(message) # todo: convert this to logger
+        for id in self.log_list:
+            log_obj:dict = {'message': str(message), 'severity': severity, 'from': self.namespace, 'ts': int(time.time() * 100)}
+            self._states.push_log(id, log_obj)
         
     def _validate_id(self, id:str) -> None:
         """validate that id fits our restrictions
