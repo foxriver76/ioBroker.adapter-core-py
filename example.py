@@ -12,10 +12,10 @@ import asyncio
 async def main():
     
     def handle_object_updates(obj_id, obj):
-        adapter.log(f'got obj {obj_id} {obj}', 'warn')
+        adapter.log.info(f'got obj {obj_id} {obj}')
       
     def handle_state_updates(state_id, state):
-        adapter.log(f'got state {state_id} {state}', 'warn')
+        adapter.log.info(f'got state {state_id} {state}')
     
     adapter = Adapter('hm-rpc', 'hm-rpc.0', handle_state_updates, handle_object_updates)
     await adapter.prepare_for_use()
@@ -27,14 +27,14 @@ async def main():
     
     try:
         testObj = await adapter.get_foreign_object('hm-rpc.0.testObj.')
-        adapter.log(testObj, 'warn')
+        adapter.log.error(testObj)
     except Exception as e:
-        adapter.log(e, 'error')
+        adapter.log.error(e)
         
     await adapter.set_state('testing', {'val1': True})
     testState = await adapter.get_state('testing')
     
-    print(testState)
+    adapter.log.info(testState)
     
     await adapter.subscribe_objects('*')
     await adapter.subscribe_states('*')

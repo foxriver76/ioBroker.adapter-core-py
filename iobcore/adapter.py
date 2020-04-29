@@ -14,20 +14,23 @@ from iobcore.objects import ObjectsDB
 import asyncio
 import fnmatch
 import time
+from iobcore.logger import IobLogger
 
 class Adapter:
     
-    def __init__(self, name:str, namespace:str, state_cb=None, obj_cb=None, logfile:str='log.log') -> None:
+    def __init__(self, name:str, namespace:str, state_cb=None, obj_cb=None, logfile:str='log.log', loglevel='info') -> None:
         self.name = name
         self.namespace = namespace
         
         self.state_cb = state_cb
         self.obj_cb = obj_cb
+        self.loglevel = loglevel
         
         self.log_list = []
-          
+        self.log = IobLogger(self.namespace, self.loglevel, self._log_push)
+
         self._objects = ObjectsDB()
-        self._states = StatesDB()
+        self._states = StatesDB(logger=self.log)
     
     async def prepare_for_use(self):
         await self._states.init_db()
@@ -50,14 +53,14 @@ class Adapter:
                 })
     
         await self.init_logging()
-        
+                
         asyncio.create_task(self.handle_object_changes())
         asyncio.create_task(self.handle_state_changes())
         
     async def handle_state_changes(self) -> None:
         while (True):
             state_id, state = await self._states.get_message()
-            print(f'state change {state_id}:\n{state}')
+            self.log.debug(f'state change {state_id}:\n{state}')
             if fnmatch.fnmatch(state_id, '*.logging'):
                 adapter_name:str = state_id[:-len(".logging")]
                 if state['val'] is True and adapter_name not in self.log_list:
@@ -72,7 +75,7 @@ class Adapter:
     async def handle_object_changes(self) -> None:
         while (True):
             obj_id, obj = await self._objects.get_message()
-            print(f'object change {obj_id}:\n{obj}')
+            self.log.debug(f'object change {obj_id}:\n{obj}')
             if self.obj_cb is not None:
                 self.obj_cb(obj_id, obj)
             
@@ -203,8 +206,7 @@ class Adapter:
         """get subscribed state changes"""
         return await self._objects.get_message()
     
-    def log(self, message:str, severity:str='info') -> None:
-        print(message) # todo: convert this to logger
+    def _log_push(self, message:str, severity:str='info') -> None:
         for id in self.log_list:
             log_obj:dict = {'message': str(message), 'severity': severity, 'from': self.namespace, 'ts': int(time.time() * 1000)}
             self._states.push_log(id, log_obj)

@@ -14,11 +14,12 @@ import random
 
 class StatesDB:
     
-    def __init__(self, port:int=6379, namespace:str='io'):
+    def __init__(self, port:int=6379, namespace:str='io', logger=None):
         self.port = port
         self.namespace = f'{namespace}.'
         self.namespace_log = 'log.'
         
+        self.log = logger
         self.global_log_id = round(random.random() * 100000000)
    
     async def init_db(self) -> None:
@@ -124,7 +125,6 @@ class StatesDB:
             self.global_log_id = 0
             
         log['_id'] = self.global_log_id
-        print(f'push to {id}')
         self.redis.publish(f'{self.namespace_log}{id}', json.dumps(log))
                 
     async def get_message(self) -> dict:
@@ -141,11 +141,11 @@ class StatesDB:
                     # check if it matches our subscriptions
                     for pattern in self.subs_receiver.patterns:
                         if fnmatch.fnmatch(msg, pattern):
-                            print(f'{msg[len(self.namespace):]} expired')
+                            self.log.info(f'{msg[len(self.namespace):]} expired')
                             return str(msg[len(self.namespace):], 'utf-8'), {}
                 elif sender.name == b'__keyevent@0__:evicted':
                     # check if it matches our subscriptions
                     for pattern in self.subs_receiver.patterns:
                         if fnmatch.fnmatch(msg, pattern):
-                            print(f'{msg[len(self.namespace):]} evicted. Please check your maxMemory settings for your redis instance!')
+                            self.log.error(f'{msg[len(self.namespace):]} evicted. Please check your maxMemory settings for your redis instance!')
                             return str(msg[len(self.namespace):], 'utf-8'), {}              
