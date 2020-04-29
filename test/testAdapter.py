@@ -121,6 +121,15 @@ class TestAdapter(unittest.TestCase):
                 ok = True
                 
         self.assertTrue(ok, msg='hm-rpc.0.object_list_test not found in the objects list or not of type state')
+        
+    def test_get_keys(self):
+        for i in range(20):
+            _run(self.adapter.set_foreign_state(f'hm-rpc.0.test_get_states{i}', {'val': i}))
+            
+        states:list = _run(self.adapter.get_keys('hm-rpc.0.test_get_states*'))
+        
+        for i in range(20):
+            self.assertTrue(f'hm-rpc.0.test_get_states{i}' in states)
 
 if __name__ == '__main__':
     unittest.main()

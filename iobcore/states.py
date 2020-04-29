@@ -82,6 +82,22 @@ class StatesDB:
         """unsubscribe from object chamges"""
         await self.redis_sub.punsubscribe(f'{self.namespace}{pattern}')
         
+    async def get_keys(self, pattern:str) -> list:
+        """get keys matching pattern as list"""
+        cur = b'0'
+        _keys:list = []
+        
+        while cur:
+            cur, keys = await self.redis.scan(cur, f'{self.namespace}{pattern}', 500)
+
+            for key in keys:
+                # remove duplicates
+                if key not in _keys:
+                    _keys.append(str(key[len(self.namespace):], 'utf-8'))
+                    
+        _keys.sort()
+        return _keys
+        
     async def get_message(self) -> dict:
         """get subscribed messages if some there"""
         while await self.subs_receiver.wait_message():

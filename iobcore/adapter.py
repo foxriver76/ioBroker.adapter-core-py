@@ -178,6 +178,10 @@ class Adapter:
         """unsubscribe to foreign state changes"""
         await self._objects.unsubscribe(pattern)
         
+    async def get_keys(self, pattern:str) -> list:
+        """get keys as list matching the pattern"""
+        return await self._states.get_keys(pattern)
+        
     async def get_state_updates(self) -> dict:
         """get subscribed state changes"""
         return await self._states.get_message()

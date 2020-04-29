@@ -70,7 +70,7 @@ class ObjectsDB:
                 id:str = str(msg[0][len(self.objectNamespace):], 'utf-8')
                 return id, obj
             
-    async def get_object_list(self, params, options):
+    async def get_object_list(self, params, options) -> list:
         """returns all objects matching params.starkey to params.endkey"""
         await utils.check_object_rights(None, None, None, options, utils.ACCESS_LIST)
         
