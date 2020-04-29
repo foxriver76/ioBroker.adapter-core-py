@@ -16,6 +16,7 @@ class StatesDB:
     def __init__(self, port:int=6379, namespace:str='io'):
         self.port = port
         self.namespace = f'{namespace}.'
+        self.namespace_log = 'log.'
         
     async def init_db(self) -> None:
         self.redis = await aioredis.create_redis(('localhost', self.port))

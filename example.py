@@ -9,8 +9,18 @@ Created on Tue Apr 14 11:57:49 2020
 from iobcore.adapter import Adapter
 import asyncio
 
+
+
+
 async def main():
-    adapter = Adapter('hm-rpc', 'hm-rpc.0')
+    
+    def handle_object_updates(obj_id, obj):
+        print(f'got obj {obj_id} {obj}')
+      
+    def handle_state_updates(state_id, state):
+        print(f'got state {state_id} {state}')
+    
+    adapter = Adapter('hm-rpc', 'hm-rpc.0', handle_state_updates, handle_object_updates)
     await adapter.prepare_for_use()
     
     await adapter.set_object('testObj', {
@@ -34,21 +44,16 @@ async def main():
     
     await adapter.set_state('test', {'val': 5, 'expire': 2})
     
-    async def handle_object_updates():
-        # listen to object changes
-        while (True):
-            objId, obj = await adapter.get_object_updates()
-            print(f'object change of {objId}:\n{obj}')
-            
-    async def handle_state_updates():
-        # listen to state changes
-        while (True):
-            stateId, state = await adapter.get_state_updates()
-            print(f'state change of {stateId}:\n{state}')
+    def handle_object_updates(obj_id, obj):
+        print(f'got obj {obj_id} {obj}')
+          
+    def handle_state_updates(state_id, state):
+        print(f'got obj {state_id} {state}')
+
     
     # register your state handlers
-    asyncio.create_task(handle_object_updates())
-    asyncio.create_task(handle_state_updates())
+#    asyncio.create_task(handle_object_updates())
+#    asyncio.create_task(handle_state_updates())
         
     while (True):
         # Do what you like here

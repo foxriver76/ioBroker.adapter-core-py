@@ -8,13 +8,16 @@ Created on Tue Apr 14 11:08:48 2020
 
 from iobcore.states import StatesDB
 from iobcore.objects import ObjectsDB
-import logging
+import asyncio
 
 class Adapter:
     
-    def __init__(self, name:str, namespace:str) -> None:
+    def __init__(self, name:str, namespace:str, state_cb=None, obj_cb=None) -> None:
         self.name = name
         self.namespace = namespace
+        
+        self.state_cb = state_cb
+        self.obj_cb = obj_cb
           
         self._objects = ObjectsDB()
         self._states = StatesDB()
@@ -38,6 +41,35 @@ class Adapter:
                 'expire': 30,
                 'from': f'system.adapter.{self.namespace}'
                 })
+    
+        await self.init_logging()
+        
+        asyncio.create_task(self.handle_object_changes())
+        asyncio.create_task(self.handle_state_changes())
+        
+    async def handle_state_changes(self) -> None:
+        while (True):
+            state_id, state = await self._states.get_message()
+            print(f'state change {state_id}:\n{state}')
+            if self.state_cb is not None:
+                self.state_cb(state_id, state)
+            
+    async def handle_object_changes(self) -> None:
+        while (True):
+            obj_id, obj = await self._objects.get_message()
+            print(f'state change {obj_id}:\n{obj}')
+            if self.obj_cb is not None:
+                self.obj_cb(obj_id, obj)
+            
+    async def init_logging(self) -> None:
+        """init logging, store who wants our logs"""
+        await self.subscribe_foreign_states('*.logging')
+        
+    def change_object_cb(self, obj_cb):
+        self.obj_cb = obj_cb
+        
+    def change_state_cb(self, state_cb):
+        self.state_cb = state_cb
         
     async def get_object(self, id:str, options:dict={}) -> dict:
         """returns object of adapters namespace"""

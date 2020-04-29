@@ -57,23 +57,21 @@ class TestAdapter(unittest.TestCase):
     def test_subscribe_foreign_states(self):
         async def subscribe_foreign_states():
             await self.adapter.subscribe_foreign_states('hm-rpc.0.*')
-            
-            set_state:dict = {'val': 5, 'expire': 1}
-            await self.adapter.set_state('test', set_state)
-            await self.adapter.set_foreign_state('hm-rega.0.test', {'val': '3'})
-            
-            count:int = 0
-            
-            while (True):
-                state_id, state = await self.adapter.get_state_updates()
-                
+            self.count = 0
+            def state_cb(state_id, state):
                 # check if correct state or expire
                 if state_id == 'hm-rpc.0.test' and (set_state == state or state == {}):
-                    count += 1
-                    if count == 2:
+                    self.count += 1
+                    if self.count == 2:
+                        self.count = None
                         loop.stop()   
                 else:
                     self.assertTrue(False, f'hm-rpc.0.* subscribed, but got {state_id}')
+            
+            self.adapter.change_state_cb(state_cb)
+            set_state:dict = {'val': 5, 'expire': 1}
+            await self.adapter.set_state('test', set_state)
+            await self.adapter.set_foreign_state('hm-rega.0.test', {'val': '3'})                
             
         loop = asyncio.get_event_loop()
         loop.create_task(subscribe_foreign_states())
@@ -83,6 +81,14 @@ class TestAdapter(unittest.TestCase):
         async def subscribe_foreign_objects():
             await self.adapter.subscribe_objects('tes*')
             
+            def obj_cb(obj_id, obj):
+                # check if correct state or expire
+                if obj_id == 'hm-rpc.0.testing' and set_object == obj:
+                        loop.stop()   
+                else:
+                    self.assertTrue(False, f'hm-rpc.0.* subscribed, but got {obj_id}')
+            
+            self.adapter.change_object_cb(obj_cb)
             set_object:dict = {'type': 'state', 
                               'common': {
                                       'name': 'hello',
@@ -93,13 +99,6 @@ class TestAdapter(unittest.TestCase):
             await self.adapter.set_object('testing', set_object)
             await self.adapter.set_object('notMatching', {'type' : 'meta'})
 
-            while (True):
-                obj_id, obj = await self.adapter.get_object_updates()
-                # check if correct state or expire
-                if obj_id == 'hm-rpc.0.testing' and set_object == obj:
-                        loop.stop()   
-                else:
-                    self.assertTrue(False, f'hm-rpc.0.* subscribed, but got {obj_id}')
             
         loop = asyncio.get_event_loop()
         loop.create_task(subscribe_foreign_objects())
