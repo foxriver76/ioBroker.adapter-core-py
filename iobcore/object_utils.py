@@ -10,6 +10,7 @@ import re
 
 reg_user = '^system\.user\.'
 reg_group = '^system\.group\.'
+reg_check_id = '[*?\[\]]|\$%\$'
 
 SYSTEM_ADMIN_USER  = 'system.user.admin'
 SYSTEM_ADMIN_GROUP = 'system.group.administrator'
@@ -129,7 +130,7 @@ def check_object(obj:dict={}, options:dict={}, flag:str=None) -> None:
             # admin group has all perms
             return
         
-    if obj['acl']['owner'] != options['user']:
+    if 'user' not in options or obj['acl']['owner'] != options['user']:
         # owner is not user who wants access, maybe group fits
         if 'group' in options.keys() and options['group'] == obj['acl']['ownerGroup'] or 'groups' in options.keys() and obj['acl']['ownerGroup'] in options['groups']:
             if not (obj['acl']['object'] & (flag << 4)):

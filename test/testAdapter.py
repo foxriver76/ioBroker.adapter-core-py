@@ -14,10 +14,6 @@ import unittest
 def _run(coro):
     return asyncio.get_event_loop().run_until_complete(coro)
 
-def _async_task(coro):
-    asyncio.run(coro)
-    return asyncio.create_task(coro)
-
 class TestAdapter(unittest.TestCase):
     
     def setUp(self):
@@ -109,5 +105,23 @@ class TestAdapter(unittest.TestCase):
         loop.create_task(subscribe_foreign_objects())
         loop.run_forever()
         
+    def test_get_object_list(self):
+        _run(self.adapter.set_foreign_object('hm-rpc.0.object_list_test', {'type': 'state',
+                                                                           'common': {
+                                                                                   'name': 'get list',
+                                                                                   'type': 'string'
+                                                                                   }
+                                                                           }))
+        objs:dict = _run(self.adapter.get_object_list({'startkey': 'hm-rpc.0', 'endkey': 'hm-rpc.0\u9999'}))
+        self.assertTrue('rows' in objs)
+        
+        ok:bool = False
+        
+        for obj in objs['rows']:
+            if obj['id'] == 'hm-rpc.0.object_list_test' and obj['value']['type'] == 'state':
+                ok = True
+                
+        self.assertTrue(ok, msg='hm-rpc.0.object_list_test not found in the objects list or not of type state')
+
 if __name__ == '__main__':
     unittest.main()

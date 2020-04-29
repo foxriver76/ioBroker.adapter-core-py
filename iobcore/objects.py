@@ -10,6 +10,7 @@ import aioredis
 import json
 import time
 import iobcore.object_utils as utils
+import re
 
 class ObjectsDB:
     
@@ -71,5 +72,51 @@ class ObjectsDB:
             
     async def get_object_list(self, params, options):
         """returns all objects matching params.starkey to params.endkey"""
-        # TODO: implement this to finish check_objects_rights implementation
-        pass
+        await utils.check_object_rights(None, None, None, options, utils.ACCESS_LIST)
+        
+        if params['endkey'][:len(params['startkey'])] == params['startkey']:
+            pattern:str = f'{self.objectNamespace}{params["startkey"]}*'
+        else:
+            pattern:str = f'{self.objectNamespace}*'
+        
+        # now scan the pattern
+        cur = b'0'
+        _keys = []
+        
+        while cur:
+            cur, keys = await self.redis.scan(cur, pattern, 500)
+            for key in keys:
+                id = str(key[len(self.objectNamespace):], 'utf-8')
+                
+                if id < params['startkey']:
+                    continue
+                
+                if id > params['endkey']:
+                    continue
+                
+                if re.match(utils.reg_check_id, id) and re.match('\|file\$%\$', id):
+                    continue
+                
+                if 'include_docs' not in params and id[0] == '_':
+                    continue
+                
+                # scan can return duplicates
+                if key not in _keys:
+                    _keys.append(key)
+                       
+        _keys.sort()
+
+        res:dict = {'rows': []}
+        objs:list = await self.redis.mget(*_keys)
+        
+        for obj in objs:
+            obj = json.loads(obj)
+            
+            try:
+                utils.check_object(obj, options, utils.ACCESS_READ)
+            except PermissionError:
+                continue
+            
+            res['rows'].append({'id': obj['_id'], 'value': obj, 'doc': obj})
+                
+        return res
