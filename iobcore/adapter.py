@@ -41,7 +41,7 @@ class Adapter:
         
     async def get_object(self, id:str, options:dict={}) -> dict:
         """returns object of adapters namespace"""
-        id = f'{self.namespace}.{id}'
+        id:str = f'{self.namespace}.{id}'
         return await self.get_foreign_object(id, options)
     
     async def get_object_list(self, params:dict={}, options:dict={}):
@@ -57,7 +57,7 @@ class Adapter:
     
     async def set_object(self, id:str, obj:dict) -> None:
         """set object to adapters namespace"""
-        id = f'{self.namespace}.{id}'
+        id:str = f'{self.namespace}.{id}'
         return await self.set_foreign_object(id, obj)
     
     async def set_foreign_object(self, id:str, obj:dict) -> None:
@@ -73,7 +73,7 @@ class Adapter:
         
     async def get_state(self, id:str) -> dict:
         """returns state of adapters namespace"""
-        id = f'{self.namespace}.{id}'
+        id:str = f'{self.namespace}.{id}'
         return await self.get_foreign_state(id)
     
     async def get_foreign_state(self, id:str) -> dict:
@@ -85,7 +85,7 @@ class Adapter:
     
     async def set_state(self, id:str, state:dict) -> None:
         """set state to adapters namespace"""
-        id = f'{self.namespace}.{id}'
+        id:str = f'{self.namespace}.{id}'
         return await self.set_foreign_state(id, state)
     
     async def set_foreign_state(self, id:str, state:dict) -> None:

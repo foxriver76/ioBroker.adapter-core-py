@@ -16,6 +16,7 @@ setuptools.setup(name='iobroker.adapter-core-py',
       author_email='moritz.heusinger@gmail.com',
       packages=setuptools.find_packages(),
       install_requires=[
-              'redis'
+              'aioredis'
       ],
+      license='CC-BY-NC-4.0',
       zip_safe=False)

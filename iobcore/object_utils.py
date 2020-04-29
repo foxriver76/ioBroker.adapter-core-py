@@ -179,6 +179,9 @@ def get_default_admin_rights(acl:dict=None):
     return acl
 
 def get_user_group(objects:dict, user:str):
+    if not re.match(reg_user, user):
+        raise ValueError(f'Invalid username {user}')
+        
     acl = {}
     
     # TODO    
