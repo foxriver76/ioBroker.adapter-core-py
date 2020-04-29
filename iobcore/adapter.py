@@ -14,6 +14,7 @@ from iobcore.states import StatesDB
 from iobcore.objects import ObjectsDB
 import asyncio
 import fnmatch
+import random
 
 class Adapter:
     
@@ -25,6 +26,7 @@ class Adapter:
         self.obj_cb = obj_cb
         
         self.log_list = []
+        self.global_log_id = round(random.random() * 100000000)
           
         self._objects = ObjectsDB()
         self._states = StatesDB()
@@ -80,6 +82,14 @@ class Adapter:
         """init logging, store who wants our logs"""
         # get all logging states
         keys:list = await self._states.get_keys('*.logging')
+        states:list = await self._states.get_states(keys)
+        
+        for i in range(len(keys)):
+            # all True states want our log
+            if states[i]['val'] is True and keys[i] not in self.log_list:
+                self.log_list.append(keys[i])
+                
+        # now we subscribe to changes on logging        
         await self.subscribe_foreign_states('*.logging')
         
     def change_object_cb(self, obj_cb):
@@ -195,6 +205,9 @@ class Adapter:
         """get subscribed state changes"""
         return await self._objects.get_message()
     
+    async def log(self, severity:str='info') -> None:
+        pass
+        
     def _validate_id(self, id:str) -> None:
         """validate that id fits our restrictions
             if id is invalid an error is raised

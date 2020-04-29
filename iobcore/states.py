@@ -96,8 +96,7 @@ class StatesDB:
                 state:dict = json.loads(state)
             _states.append(state)
             
-        return _states
-            
+        return _states           
         
     async def get_keys(self, pattern:str) -> list:
         """get keys matching pattern as list"""
@@ -114,6 +113,10 @@ class StatesDB:
                     
         _keys.sort()
         return _keys
+    
+    async def push_log(self, id:str, log:dict) -> None:
+        """push log to given instance via redis"""
+        pass # todo
         
     async def get_message(self) -> dict:
         """get subscribed messages if some there"""
