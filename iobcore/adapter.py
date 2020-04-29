@@ -206,7 +206,7 @@ class Adapter:
     def log(self, message:str, severity:str='info') -> None:
         print(message) # todo: convert this to logger
         for id in self.log_list:
-            log_obj:dict = {'message': str(message), 'severity': severity, 'from': self.namespace, 'ts': int(time.time() * 100)}
+            log_obj:dict = {'message': str(message), 'severity': severity, 'from': self.namespace, 'ts': int(time.time() * 1000)}
             self._states.push_log(id, log_obj)
         
     def _validate_id(self, id:str) -> None:

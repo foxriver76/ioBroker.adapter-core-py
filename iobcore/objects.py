@@ -30,7 +30,7 @@ class ObjectsDB:
         await utils.check_object_rights(self, id, obj, options, utils.ACCESS_WRITE)
             
         if 'ts' not in obj.keys():
-            obj['ts'] = int(time.time() * 100)
+            obj['ts'] = int(time.time() * 1000)
             
         # on objects we save id as attribute
         obj['_id'] = id

@@ -33,7 +33,7 @@ class StatesDB:
     async def set_state(self, id:str=None, state:dict={}) -> None:
         """Set state in db and publish"""
         if 'ts' not in state.keys():
-            state['ts'] = int(time.time() * 100)
+            state['ts'] = int(time.time() * 1000)
             
         if 'ack' not in state.keys():
             state['ack'] = False
