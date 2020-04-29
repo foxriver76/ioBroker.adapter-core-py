@@ -55,7 +55,7 @@ class TestAdapter(unittest.TestCase):
         self.assertRaises(PermissionError, _run, self.adapter.get_object('testObj1', {'user': 'system.user.max'}))
         
     def test_subscribe_foreign_states(self):
-        async def subscribe_froeign_states():
+        async def subscribe_foreign_states():
             await self.adapter.subscribe_foreign_states('hm-rpc.0.*')
             
             set_state:dict = {'val': 5, 'expire': 1}
@@ -76,7 +76,7 @@ class TestAdapter(unittest.TestCase):
                     self.assertTrue(False, f'hm-rpc.0.* subscribed, but got {state_id}')
             
         loop = asyncio.get_event_loop()
-        loop.create_task(subscribe_froeign_states())
+        loop.create_task(subscribe_foreign_states())
         loop.run_forever()
         
     def test_subscribe_foreign_objects(self):
