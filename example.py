@@ -48,7 +48,7 @@ async def main():
         print(f'got obj {obj_id} {obj}')
           
     def handle_state_updates(state_id, state):
-        print(f'got obj {state_id} {state}')
+        print(f'got state {state_id} {state}')
 
     
     # register your state handlers

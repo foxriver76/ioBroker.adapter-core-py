@@ -6,9 +6,14 @@ Created on Tue Apr 14 11:08:48 2020
 @author: moritz
 """
 
+# TODOs:
+# get all logging states at the beginning and adjust loglist
+# pushLog on every log + implement pushLog in statesDB
+
 from iobcore.states import StatesDB
 from iobcore.objects import ObjectsDB
 import asyncio
+import fnmatch
 
 class Adapter:
     
@@ -18,6 +23,8 @@ class Adapter:
         
         self.state_cb = state_cb
         self.obj_cb = obj_cb
+        
+        self.log_list = []
           
         self._objects = ObjectsDB()
         self._states = StatesDB()
@@ -51,13 +58,21 @@ class Adapter:
         while (True):
             state_id, state = await self._states.get_message()
             print(f'state change {state_id}:\n{state}')
+            if fnmatch.fnmatch(state_id, '*.logging'):
+                adapter_name:str = state_id[:-len(".logging")]
+                if state['val'] is True and adapter_name not in self.log_list:
+                    # add to log list
+                    self.log_list.append(adapter_name)
+                elif state['val'] is False and adapter_name in self.log_list:
+                    self.log_list.remove(adapter_name)             
+                continue
             if self.state_cb is not None:
                 self.state_cb(state_id, state)
             
     async def handle_object_changes(self) -> None:
         while (True):
             obj_id, obj = await self._objects.get_message()
-            print(f'state change {obj_id}:\n{obj}')
+            print(f'object change {obj_id}:\n{obj}')
             if self.obj_cb is not None:
                 self.obj_cb(obj_id, obj)
             
