@@ -18,7 +18,7 @@ from iobcore.logger import IobLogger
 
 class Adapter:
     
-    def __init__(self, name:str, namespace:str, state_cb=None, obj_cb=None, logfile:str='log.log', loglevel='info') -> None:
+    def __init__(self, name:str, namespace:str, state_cb=None, obj_cb=None, logfile:str='/opt/iobroker/log/iobroker.current.log', loglevel='info') -> None:
         self.name = name
         self.namespace = namespace
         
@@ -27,7 +27,7 @@ class Adapter:
         self.loglevel = loglevel
         
         self.log_list = []
-        self.log = IobLogger(self.namespace, self.loglevel, self._log_push)
+        self.log = IobLogger(self.namespace, self.loglevel, self._log_push, logfile=logfile)
 
         self._objects = ObjectsDB()
         self._states = StatesDB(logger=self.log)

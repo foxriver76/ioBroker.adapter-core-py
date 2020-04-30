@@ -11,19 +11,28 @@ import logging
 
 class IobLogger(logging.Logger):
     
-    def __init__(self, namespace, loglevel, cb):
+    def __init__(self, namespace:str, loglevel:str, cb, logfile:str):
         super().__init__(self)
         self.cb = cb
         self.d = {'namespace': namespace}
-        FORMAT = '%(namespace)s %(asctime)s %(loglevel)s %(message)s'
+        FORMAT = '%(asctime)s.%(msecs)03d  - %(loglevel)s: %(namespace)s %(message)s'
         self.setLevel(loglevel.upper())
         
-        formatter = logging.Formatter(FORMAT)
+        formatter = logging.Formatter(FORMAT, datefmt='%Y-%m-%d %H:%M:%S')
+        
+        # stream handler
         ch = logging.StreamHandler()
         ch.setLevel(loglevel.upper())
         ch.setFormatter(formatter)
         
         self.addHandler(ch)
+        
+        # file handler
+        fh = logging.FileHandler(filename=logfile)
+        fh.setLevel(loglevel.upper())
+        fh.setFormatter(formatter)
+        
+        self.addHandler(fh)
         
     def debug(self, msg, *args, **kwargs):
         """
