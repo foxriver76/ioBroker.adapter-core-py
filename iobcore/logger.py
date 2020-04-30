@@ -14,6 +14,8 @@ class IobLogger(logging.Logger):
         super().__init__(self)
         if loglevel.upper() == 'SILLY':
             loglevel = 'DEBUG'
+        elif loglevel.upper() == 'WARN':
+            loglevel = 'WARNING'
     
         self.cb = cb
         self.d = {'namespace': namespace}
@@ -40,6 +42,22 @@ class IobLogger(logging.Logger):
         self.silly = self.debug
         self.warn = self.warning
         
+    def setLevel(self, level):
+        """
+        Set the logging level of this logger.  level must be an int or a str.
+        """
+        if level.upper() == 'SILLY':
+            level = 'DEBUG'
+        elif level.upper() == 'WARN':
+            level = 'WARNING'
+       
+        # adjust all our handlers
+        for handler in self.handlers:
+            handler.setLevel(level.upper())
+            
+        self.level = logging._checkLevel(level.upper())
+        self.manager._clear_cache()
+        
     def debug(self, msg, *args, **kwargs):
         """
         Log 'msg % args' with severity 'DEBUG'.
@@ -54,7 +72,6 @@ class IobLogger(logging.Logger):
         msg = str(msg)
         if self.isEnabledFor(logging.DEBUG):
             self._log(logging.DEBUG, msg, args, **kwargs)
-            print(self.getL)
             self.cb(msg, 'debug')
 
     def info(self, msg, *args, **kwargs):

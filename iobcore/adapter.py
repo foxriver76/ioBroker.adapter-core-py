@@ -6,8 +6,9 @@ Created on Tue Apr 14 11:08:48 2020
 @author: moritz
 """
 
-# TODOs:
-# use real logger
+# TODOs: 
+# - restart on system.adapter.namespace object changes
+# - handle system.adapter.namespace* object and state changes with different subscriber
 
 from iobcore.states import StatesDB
 from iobcore.objects import ObjectsDB
@@ -57,9 +58,17 @@ class Adapter:
         sys_obj:dict = await self._objects.get_object(f'system.adapter.{self.namespace}')
         
         self.config = sys_obj['native'] if 'native' in sys_obj else {}
+        
+        # get the loglevel
+        if 'common' in sys_obj and 'loglevel' in sys_obj['common']:
+            # update loglevel
+            self.log.setLevel(sys_obj['common']['loglevel'])
+            # update states logger
+            self._states.log = self.log
             
         asyncio.create_task(self.handle_object_changes())
         asyncio.create_task(self.handle_state_changes())
+        asyncio.create_task(self.report_status_interval())
         
     async def handle_state_changes(self) -> None:
         while (True):
@@ -83,6 +92,27 @@ class Adapter:
             if self.obj_cb is not None:
                 self.obj_cb(obj_id, obj)
             
+    async def report_status_interval(self) -> None:
+        while (True):
+            # every 15 seconds
+            await asyncio.sleep(15)
+            
+            # adapter is alive
+            await self._states.set_state(f'system.adapter.{self.namespace}.alive', {
+                    'val': True, 
+                    'ack': True,
+                    'expire': 30,
+                    'from': f'system.adapter.{self.namespace}'
+                    })
+    
+            # tell that we are connected to objects db
+            await self._states.set_state(f'system.adapter.{self.namespace}.connected', {
+                    'val': True,
+                    'ack': True,
+                    'expire': 30,
+                    'from': f'system.adapter.{self.namespace}'
+                    })
+        
     async def init_logging(self) -> None:
         """init logging, store who wants our logs"""
         # get all logging states
