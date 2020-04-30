@@ -53,7 +53,11 @@ class Adapter:
                 })
     
         await self.init_logging()
-                
+        
+        sys_obj:dict = await self._objects.get_object(f'system.adapter.{self.namespace}')
+        
+        self.config = sys_obj['native'] if 'native' in sys_obj else {}
+            
         asyncio.create_task(self.handle_object_changes())
         asyncio.create_task(self.handle_state_changes())
         

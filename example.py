@@ -20,6 +20,8 @@ async def main():
     adapter = Adapter('hm-rpc', 'hm-rpc.0', handle_state_updates, handle_object_updates)
     await adapter.prepare_for_use()
     
+    adapter.log.warn(adapter.config)
+    
     await adapter.set_object('testObj', {
             'type': 'state',
             'common': {}

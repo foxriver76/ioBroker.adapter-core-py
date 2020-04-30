@@ -9,6 +9,7 @@ Created on Tue Apr 14 11:57:49 2020
 from iobcore.adapter import Adapter
 import asyncio
 import unittest
+import json
 
 # Helper method for async testing
 def _run(coro):
@@ -19,6 +20,13 @@ class TestAdapter(unittest.TestCase):
     def setUp(self):
         self.adapter = Adapter('hm-rpc', 'hm-rpc.0')
         _run(self.adapter.prepare_for_use())
+        
+        f = open('test/system_adapter.json')
+        system_obj:dict = json.loads(f.read())
+        f.close()
+        
+        # create our config object
+        _run(self.adapter._objects.set_object('system.adapter.hm-rpc.0', system_obj))
         
     def test_set_object_invalid(self):
         obj:dict = {
@@ -142,6 +150,9 @@ class TestAdapter(unittest.TestCase):
         for i in range(len(keys)):
             val:str = str(states[i]['val'])
             self.assertTrue(keys[i].endswith(val))    
+            
+    def test_adapter_config(self):
+        self.assertEqual(self.adapter.config['homematicPort'], '2001')
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,262 @@
+{
+  "common": {
+    "name": "hm-rpc",
+    "title": "HomeMatic RPC",
+    "desc": {
+      "en": "Connects HomeMatic Interface-Processes (BidCos-Services, Homegear and CUxD) via XML-RPC or BIN-RPC to ioBroker",
+      "de": "Verbindet HomeMatic Interface-Prozesse (BidCos-Services, Homegear und CUxD) via XML-RPC oder BIN-RPC mit ioBroker",
+      "ru": "Подключает HomeMatic интерфейсы (BidCos-сервисы, Homegear и CUxD) через XML-RPC или BIN-RPC к ioBroker",
+      "pt": "Conecta HomeMatic Interface-Processes (BidCos-Services, Homegear e CUxD) via XML-RPC ou BIN-RPC para ioBroker",
+      "nl": "Verbindt HomeMatic Interface-processen (BidCos-Services, Homegear en CUxD) via XML-RPC of BIN-RPC met ioBroker",
+      "fr": "Connecte les processus d'interface HomeMatic (BidCos-Services, Homegear et CUxD) via XML-RPC ou BIN-RPC à ioBroker",
+      "it": "Collega l'interfaccia HomeMatic: i processi (BidCos-Services, Homegear e CUxD) tramite XML-RPC o BIN-RPC su ioBroker",
+      "es": "Conecta los Procesos de Interfaz HomeMatic (BidCos-Services, Homegear y CUxD) a través de XML-RPC o BIN-RPC a ioBroker",
+      "pl": "Łączy procesy HomeMatic-Interface (BidCos-Services, Homegear i CUxD) za pośrednictwem XML-RPC lub BIN-RPC z ioBroker"
+    },
+    "version": "1.13.0",
+    "news": {
+      "1.12.10": {
+        "en": "fixed no 'dpType for ..' error in all cases",
+        "de": "In allen Fällen wurde kein Fehler 'dpType for ..' behoben",
+        "ru": "исправлена ошибка «dpType for ..» во всех случаях",
+        "pt": "Não foi corrigido nenhum erro 'dpType for ..' em todos os casos",
+        "nl": "geen 'dpType voor ...' fout opgelost in alle gevallen",
+        "fr": "correction de l'erreur \"dpType for ..\" dans tous les cas",
+        "it": "risolto nessun errore 'dpType for ..' in tutti i casi",
+        "es": "no se corrigió el error 'dpType for ..' en todos los casos",
+        "pl": "naprawiono brak błędu „dpType for ..” we wszystkich przypadkach",
+        "zh-cn": "修复了在所有情况下均未出现“ dpType for ..”错误的问题"
+      },
+      "1.12.9": {
+        "en": "we replace DISPLAY_DATA_STRING by DIN_66003 encodings",
+        "de": "Wir ersetzen DISPLAY_DATA_STRING durch DIN_66003-Codierungen",
+        "ru": "мы заменяем DISPLAY_DATA_STRING на кодировки DIN_66003",
+        "pt": "substituímos as codificações DISPLAY_DATA_STRING por DIN_66003",
+        "nl": "we vervangen DISPLAY_DATA_STRING door DIN_66003-coderingen",
+        "fr": "nous remplaçons DISPLAY_DATA_STRING par des encodages DIN_66003",
+        "it": "sostituiamo DISPLAY_DATA_STRING con codifiche DIN_66003",
+        "es": "reemplazamos DISPLAY_DATA_STRING por codificaciones DIN_66003",
+        "pl": "zastępujemy DISPLAY_DATA_STRING kodowaniem DIN_66003",
+        "zh-cn": "我们用DIN_66003编码替换DISPLAY_DATA_STRING"
+      },
+      "1.12.8": {
+        "en": "improved error handling on undefined methods",
+        "de": "Verbesserte Fehlerbehandlung bei undefinierten Methoden",
+        "ru": "улучшена обработка ошибок в неопределенных методах",
+        "pt": "manipulação aprimorada de erros em métodos indefinidos",
+        "nl": "verbeterde foutafhandeling op ongedefinieerde methoden",
+        "fr": "gestion améliorée des erreurs sur les méthodes non définies",
+        "it": "migliorata gestione degli errori su metodi non definiti",
+        "es": "manejo mejorado de errores en métodos indefinidos",
+        "pl": "poprawiona obsługa błędów w niezdefiniowanych metodach",
+        "zh-cn": "改进了对未定义方法的错误处理"
+      },
+      "1.12.7": {
+        "en": "if role 'value.window' is a boolean it is now correctly a 'sensor.window'",
+        "de": "Wenn die Rolle 'value.window' ein Boolescher Wert ist, ist sie jetzt korrekterweise ein 'sensor.window'.",
+        "ru": "если роль 'value.window' является логическим значением, теперь это правильно 'sensor.window'",
+        "pt": "se o papel 'value.window' for um booleano, agora será corretamente um 'sensor.window'",
+        "nl": "als rol 'value.window' een boolean is, is het nu correct een 'sensor.window'",
+        "fr": "si le rôle 'value.window' est un booléen c'est maintenant correctement un 'sensor.window'",
+        "it": "se il ruolo 'value.window' è un valore booleano, ora è correttamente un 'sensor.window'",
+        "es": "si el rol 'value.window' es un booleano, ahora es correctamente un 'sensor.window'",
+        "pl": "jeśli rola „wartość. okno” jest wartością logiczną, jest teraz poprawnie „czujnikiem. okno”",
+        "zh-cn": "如果角色'value.window'是布尔值，则现在正确地是'sensor.window'"
+      },
+      "1.12.6": {
+        "en": "now some meta data will be handled more abstract",
+        "de": "Jetzt werden einige Metadaten abstrakter behandelt",
+        "ru": "теперь некоторые метаданные будут обрабатываться более абстрактно",
+        "pt": "agora alguns metadados serão tratados de forma mais abstrata",
+        "nl": "nu worden sommige metagegevens abstracter behandeld",
+        "fr": "maintenant certaines métadonnées seront traitées de manière plus abstraite",
+        "it": "ora alcuni metadati verranno gestiti in modo più astratto",
+        "es": "ahora algunos metadatos se manejarán de manera más abstracta",
+        "pl": "teraz niektóre metadane będą obsługiwane bardziej abstrakcyjnie",
+        "zh-cn": "现在一些元数据将被更抽象地处理"
+      },
+      "1.12.2": {
+        "en": "fix issue on https with less robust ccu emulations",
+        "de": "Problem bei https mit weniger robusten ccu-Emulationen behoben",
+        "ru": "исправить проблему на https с менее надежной эмуляцией ccu",
+        "pt": "corrigir problema em https com emulações de CPU menos robustas",
+        "nl": "probleem op https oplossen met minder robuuste ccu-emulaties",
+        "fr": "correction d'un problème sur https avec des émulations ccu moins robustes",
+        "it": "risolve il problema su https con emulazioni ccu meno robuste",
+        "es": "Solucione el problema en https con emulaciones ccu menos robustas",
+        "pl": "napraw problem na https przy mniej niezawodnych emulacjach ccu",
+        "zh-cn": "使用不太健壮的ccu仿真修复https上的问题"
+      },
+      "1.12.1": {
+        "en": "fixed problem with max values of value lists",
+        "de": "Problem mit Maximalwerten von Wertelisten behoben",
+        "ru": "исправлена проблема с максимальными значениями списков значений",
+        "pt": "problema corrigido com valores máximos de listas de valores",
+        "nl": "probleem opgelost met maximale waarden van waardenlijsten",
+        "fr": "problème résolu avec les valeurs maximales des listes de valeurs",
+        "it": "risolto problema con valori massimi di liste valori",
+        "es": "problema solucionado con valores máximos de listas de valores",
+        "pl": "naprawiono problem z maksymalnymi wartościami list wartości",
+        "zh-cn": "固定值列表最大值的问题"
+      },
+      "1.12.0": {
+        "en": "we no longer use adapter.objects directly",
+        "de": "Wir verwenden adapter.objects nicht mehr direkt",
+        "ru": "мы больше не используем адаптер.объекты напрямую",
+        "pt": "não usamos mais o adapter.objects diretamente",
+        "nl": "we gebruiken adapter.objects niet langer rechtstreeks",
+        "fr": "nous n'utilisons plus directement adapter.objects",
+        "it": "non utilizziamo più adapter.objects direttamente",
+        "es": "ya no usamos adaptador.objetos directamente",
+        "pl": "nie używamy już bezpośrednio adapter.objects",
+        "zh-cn": "我们不再直接使用adapter.objects"
+      },
+      "1.13.0": {
+        "en": "added Sentry plugin support",
+        "de": "Unterstützung für Sentry-Plugins hinzugefügt",
+        "ru": "добавлена поддержка плагинов Sentry",
+        "pt": "adicionado suporte ao plugin Sentry",
+        "nl": "ondersteuning voor Sentry-plug-ins toegevoegd",
+        "fr": "ajout du support du plugin Sentry",
+        "it": "aggiunto il supporto del plugin Sentry",
+        "es": "Se agregó soporte para el complemento Sentry",
+        "pl": "dodano obsługę wtyczek Sentry",
+        "zh-cn": "添加了Sentry插件支持"
+      }
+    },
+    "authors": [
+      "hobbyquaker <hq@ccu.io>",
+      "Moritz Heusinger <moritz.heusinger@gmail.com>"
+    ],
+    "license": "MIT",
+    "mode": "daemon",
+    "platform": "Javascript/Node.js",
+    "loglevel": "debug",
+    "readme": "https://github.com/ioBroker/ioBroker.hm-rpc/blob/master/README.md",
+    "icon": "homematic.png",
+    "materialize": true,
+    "compact": true,
+    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.hm-rpc/master/admin/homematic.png",
+    "keywords": [
+      "homematic",
+      "bidcos",
+      "eq3",
+      "ELV",
+      "CCU",
+      "CCU1",
+      "CCU2",
+      "rpc",
+      "xmlrpc",
+      "homegear",
+      "binrpc",
+      "CUxD",
+      "FS20",
+      "FHT",
+      "HMS",
+      "EnOcean"
+    ],
+    "type": "iot-systems",
+    "connectionType": "local",
+    "dataSource": "push",
+    "supportStopInstance": true,
+    "messagebox": true,
+    "dependencies": [
+      {
+        "js-controller": ">=2.0.0"
+      }
+    ],
+    "installedVersion": "1.13.0",
+    "enabled": false,
+    "host": "moritz-XPS-13-9360",
+    "plugins": {
+      "sentry": {
+        "dsn": "https://1bc0c96f48e44483b283bc5fc0ca91e2@sentry.iobroker.net/10",
+        "pathWhitelist": [],
+        "errorBlacklist": [
+          "SyntaxError"
+        ]
+      }
+    },
+    "installedFrom": "iobroker.hm-rpc@1.13.0"
+  },
+  "native": {
+    "homematicAddress": "192.168.178.123",
+    "adapterAddress": "192.168.178.92",
+    "homematicPort": "2001",
+    "callbackAddress": "",
+    "port": "0",
+    "type": "xml",
+    "daemon": "rfd",
+    "checkInitInterval": "180",
+    "reconnectInterval": "30",
+    "forceReInit": false,
+    "username": "",
+    "password": "",
+    "useHttps": false,
+    "dontDelete": false
+  },
+  "type": "instance",
+  "from": "system.adapter.admin.0",
+  "ts": 1588162183649,
+  "_id": "system.adapter.hm-rpc.0",
+  "acl": {
+    "object": 1636,
+    "owner": "system.user.admin",
+    "ownerGroup": "system.group.administrator"
+  },
+  "user": "system.user.admin",
+  "protectedNative": [
+    "username",
+    "password"
+  ],
+  "encryptedNative": [],
+  "instanceObjects": [
+    {
+      "_id": "updated",
+      "type": "state",
+      "common": {
+        "name": "Some new devices added",
+        "type": "boolean",
+        "read": true,
+        "write": true
+      }
+    },
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "If connected to CCU",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ],
+  "objects": [
+    {
+      "_id": "_design/hm-rpc",
+      "language": "javascript",
+      "views": {
+        "listDevices": {
+          "map": "function(doc) {\n  if (doc._id.match(/^hm-rpc\\.[0-9]+\\.\\*?[A-Za-z0-9_-]+(\\.[0-9]+)?$/)) {\n   emit(doc._id, {ADDRESS:(doc.native?doc.native.ADDRESS:''),VERSION:(doc.native?doc.native.VERSION:'')});\n  }\n}"
+        },
+        "paramsetDescription": {
+          "map": "function(doc) {\n  if (doc._id.match(/^hm-rpc\\.meta/) && doc.meta.type === 'paramsetDescription') {\n   emit(doc._id, doc);\n  }\n}"
+        }
+      },
+      "from": "system.host.moritz-XPS-13-9360.cli",
+      "ts": 1588110457147
+    }
+  ]
+}

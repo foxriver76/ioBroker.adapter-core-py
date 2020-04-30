@@ -6,13 +6,15 @@ Created on Wed Apr 29 21:43:34 2020
 @author: moritz
 """
 
-# TODO: use logfile path
 import logging
 
 class IobLogger(logging.Logger):
     
     def __init__(self, namespace:str, loglevel:str, cb, logfile:str):
         super().__init__(self)
+        if loglevel.upper() == 'SILLY':
+            loglevel = 'DEBUG'
+    
         self.cb = cb
         self.d = {'namespace': namespace}
         FORMAT = '%(asctime)s.%(msecs)03d  - %(loglevel)s: %(namespace)s %(message)s'
@@ -33,6 +35,10 @@ class IobLogger(logging.Logger):
         fh.setFormatter(formatter)
         
         self.addHandler(fh)
+        
+        # compatibility to javascripts versions
+        self.silly = self.debug
+        self.warn = self.warning
         
     def debug(self, msg, *args, **kwargs):
         """
